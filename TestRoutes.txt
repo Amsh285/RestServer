@@ -1,0 +1,7 @@
+
+Messages
+Messages/5
+Messages/Test -> macht kaum sinn. Versuch halt den ersten zu nehmen den du findest
+
+Messages/5/Recipient
+Messages/5/Sender
