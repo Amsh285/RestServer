@@ -20,6 +20,8 @@ namespace RestServer.EndpointHandling
             return HttpStatusCodeResult.NotFound(client, errorMessage);
         }
 
+        // Could be better solved with an IoC- Container (instantiating Controllers with a transient clientfunc)
+        //but this would be too much for that little Project, so Privateinvoke it is.
         private TcpClient client;
     }
 }

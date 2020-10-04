@@ -70,7 +70,7 @@ namespace RestServer.EndpointHandling
                             .ToArray();
 
                         var match = methodMatches
-                            .FirstOrDefault(match => RouteMatch.RequestPathMatchesRouteTemplate(match.Attr.Template.Split("/"), routePath));
+                            .FirstOrDefault(match => RouteMatch.RequestPathMatchesRouteTemplate(match.Attr.Template?.Split("/") ?? new string[0], routePath));
 
                         return new RouteMatch(controllerType, match.Method, match.Attr, requestPath);
                     }

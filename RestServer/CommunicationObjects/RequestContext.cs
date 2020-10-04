@@ -48,7 +48,7 @@ namespace RestServer.CommunicationObjects
             if (inputStream == null)
                 throw new ArgumentNullException($"{nameof(inputStream)} cannot be null.");
 
-            RequestParameters parameters = new RequestParameters(queryString, headers);
+            RequestParameters parameters = new RequestParameters(headers, queryString);
 
             int contentLength;
             int.TryParse(headers.GetValueOrDefault("Content-Length"), out contentLength);

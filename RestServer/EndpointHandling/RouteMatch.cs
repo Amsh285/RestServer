@@ -18,7 +18,15 @@ namespace RestServer.EndpointHandling
 
         public string MatchingPath { get; }
 
-        public string[] MatchingPathSegments { get { return MatchingPath.Split("/"); } }
+        public string[] MatchingPathSegments { 
+            get 
+            { 
+                return MatchingPath
+                    .Split("/")
+                    .Skip(1)
+                    .ToArray();
+            } 
+        }
 
         public string[] MatchingActionPathSegments
         {

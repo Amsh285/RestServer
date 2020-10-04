@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Sockets;
 using System.Reflection;
+using System.Text;
 using System.Text.Json;
 
 namespace RestServer.EndpointHandling
@@ -50,94 +51,104 @@ namespace RestServer.EndpointHandling
 
             RequestBodyExtractor bodyExtractor = new RequestBodyExtractor(context);
 
+            object controller = BuildController(match, client, context);
+            List<object> invokeArguments = new List<object>();
+
+            foreach (ParameterInfo actionParameter in match.Action.GetParameters())
+            {
+                string correspondingParameter = string.Empty;
+
+                if (!match.TemplatePathSegments.Contains($"{{{actionParameter.Name}}}"))
+                {
+                    byte[] bodyContent = ExtractFromRequestBody(match, context, bodyExtractor, actionParameter);
+                    correspondingParameter = Encoding.UTF8.GetString(bodyContent);
+                }
+                else
+                {
+                    if (context.Parameters.QueryStringValues.ContainsKey(actionParameter.Name))
+                        correspondingParameter = context.Parameters.QueryStringValues[actionParameter.Name];
+                    else if (context.Parameters.Headers.ContainsKey(actionParameter.Name))
+                        correspondingParameter = context.Parameters.Headers[actionParameter.Name];
+                    else
+                    {
+                        NotFoundException innerException = new NotFoundException($"Could not find Parameter.{actionParameter.Name} in QueryString oder Headers.");
+                        throw BuildEndpointHandlerException(match, innerException);
+                    }
+                }
+
+                try
+                {
+                    object result = JsonSerializer.Deserialize(correspondingParameter, actionParameter.ParameterType);
+                    invokeArguments.Add(result);
+                }
+                catch (JsonException jsonEx)
+                {
+                    throw BuildEndpointHandlerException(
+                         $"Could not Resolve Action Parameter:{actionParameter.Name} of Type: {actionParameter.ParameterType}.{Environment.NewLine}",
+                         match,
+                         jsonEx
+                    );
+                }
+            }
+
+            return (IActionResult)match.Action.Invoke(controller, invokeArguments.ToArray());
+        }
+
+        private static byte[] ExtractFromRequestBody(RouteMatch match, RequestContext context, RequestBodyExtractor bodyExtractor, ParameterInfo actionParameter)
+        {
+            if (supportedContentTypes.Any(sct => sct.Equals(context.Content.ContentType, StringComparison.OrdinalIgnoreCase)))
+            {
+                if (bodyExtractor.BodyExtracted)
+                    return bodyExtractor.Cache.ToArray();
+                else
+                {
+                    try
+                    {
+                        return bodyExtractor.Extract();
+                    }
+                    catch (RequestBodyExtractorException bodyExtractorEx)
+                    {
+                        EndPointHandlerException error = BuildEndpointHandlerException(
+                             $"Could not Resolve Action Parameter:{actionParameter.Name} of Type: {actionParameter.ParameterType}.",
+                             match,
+                             bodyExtractorEx
+                        );
+
+                        throw error;
+                    }
+                }
+            }
+            else
+            {
+                NotSupportedException innerException = new NotSupportedException(
+                    $"Could not Resolve Action Parameter:{actionParameter.Name} of Type: {actionParameter.ParameterType}. " +
+                    $"Invalid Content-Type:{context.Content.ContentType}. " +
+                    $"Supported Contenttypes are: {string.Join(',', supportedContentTypes)}");
+
+                throw BuildEndpointHandlerException(match, innerException);
+            }
+        }
+
+        private object BuildController(RouteMatch match, TcpClient client, RequestContext context)
+        {
             ConstructorInfo constructor = match.Controller.GetConstructors()
                 .First();
 
             List<object> parameters = ResolveConstructorParameters(match, client, context, constructor);
             object controller = constructor.Invoke(parameters.ToArray());
 
-            FieldInfo clientField = match.Controller.GetField("client");
+            if (!match.Controller.IsSubclassOf(typeof(ControllerBase)))
+                return controller;
+
+            FieldInfo clientField = typeof(ControllerBase).GetField("client", BindingFlags.NonPublic | BindingFlags.Instance);
 
             if (clientField != null && clientField.FieldType == typeof(TcpClient))
                 clientField.SetValue(controller, client);
             else
                 Console.WriteLine($"Warning: Field: client could not be found on Baseclass: {nameof(ControllerBase)}.");
 
-            List<object> arguments = new List<object>();
-
-            ParameterInfo[] actionParanmeters = match.Action.GetParameters();
-
-            foreach (ParameterInfo actionParameter in actionParanmeters)
-            {
-                int position = Array.IndexOf(match.TemplatePathSegments, $"{{{actionParameter.Name}}}");
-                string[] supportedContentTypes = { "Json", "Text", "Text/Pain" };
-
-                if (position == -1)
-                {
-                    if (supportedContentTypes.Any(sct => sct.Equals(context.Content.ContentType, StringComparison.OrdinalIgnoreCase)))
-                    {
-                        byte[] requestBody = null;
-
-                        if (bodyExtractor.BodyExtracted)
-                            requestBody = bodyExtractor.Cache.ToArray();
-                        else
-                        {
-                            try
-                            {
-                                requestBody = bodyExtractor.Extract();
-                            }
-                            catch (RequestBodyExtractorException bodyExtractorEx)
-                            {
-                                EndPointHandlerException error = BuildEndpointHandlerException(
-                                     $"Could not Resolve Action Parameter:{actionParameter.Name} of Type: {actionParameter.ParameterType}.",
-                                     match,
-                                     bodyExtractorEx
-                                );
-
-                                throw error;
-                            }
-                        }
-
-                        Assert.NotNull(requestBody, nameof(requestBody));
-
-                        try
-                        {
-                            object result = JsonSerializer.Deserialize(requestBody, actionParameter.ParameterType);
-                            parameters.Add(result);
-                        }
-                        catch (JsonException jsonEx)
-                        {
-                            EndPointHandlerException error = BuildEndpointHandlerException(
-                                     $"Could not Resolve Action Parameter:{actionParameter.Name} of Type: {actionParameter.ParameterType}.{Environment.NewLine}" +
-                                     "Failed to Deserialize the RequestBody.",
-                                     match,
-                                     jsonEx
-                                );
-
-                            throw error;
-                        }
-                    }
-                    else
-                    {
-                        NotSupportedException innerException = new NotSupportedException(
-                            $"Could not Resolve Action Parameter:{actionParameter.Name} of Type: {actionParameter.ParameterType}. " +
-                            $"Tried to Deserialize Content of Type:{context.Content.ContentType} which is not supported. " +
-                            $"Supported Contenttypes are: {string.Join(',', supportedContentTypes)}");
-                        EndPointHandlerException error = BuildEndpointHandlerException(match, innerException);
-
-                        throw error;
-                    }
-                }
-                else
-                {
-
-                }
-            }
-
-            return (IActionResult)match.Action.Invoke(controller, arguments.ToArray());
+            return controller;
         }
-
-        
 
         private List<object> ResolveConstructorParameters(RouteMatch match, TcpClient client, RequestContext context, ConstructorInfo constructor)
         {
@@ -179,14 +190,15 @@ namespace RestServer.EndpointHandling
         {
             Assert.NotNull(match, nameof(match));
 
-            if(info == null)
+            if (info == null)
                 return new EndPointHandlerException($"Error Invoking Controller:{match.Controller}.{match.Action}.", innerException);
             else
                 return new EndPointHandlerException(
                     $"Error Invoking Controller:{match.Controller}.{match.Action}.{Environment.NewLine}" +
                     info,
-                    innerException)
-                ;
+                    innerException);
         }
+
+        private static readonly string[] supportedContentTypes = { "Json", "Text", "Text/Pain" };
     }
 }

@@ -22,7 +22,7 @@ namespace RestServer
 
             Console.WriteLine("Starte WebServer auf 127.0.0.1:13000.");
 
-            IServiceProvider serviceProvider = new HardcodedServiceProvider();
+            IServiceProvider serviceProvider = new HardcodedEmptyServiceProvider();
             EndpointHandler endpointHandler = new EndpointHandler(serviceProvider);
 
             EndpointHandlerRegister handlerRegister = new EndpointHandlerRegister();
@@ -102,6 +102,10 @@ namespace RestServer
 
                         HttpStatusCodeResult.InternalServerError(client)
                             .Execute();
+                    }
+                    finally
+                    {
+                        client.Close();
                     }
                 }
             }
