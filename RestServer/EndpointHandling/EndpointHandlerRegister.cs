@@ -65,14 +65,19 @@ namespace RestServer.EndpointHandling
                             .Select(m => new {Method = m, Attr = (HttpGetAttribute)m.GetCustomAttribute(typeof(HttpGetAttribute))} )
                             .ToArray();
 
-                        string[] routePath = requestPathSegments
+                        string[] actionPathSegments = requestPathSegments
                             .Skip(1)
+                            .Where(segment => !string.IsNullOrWhiteSpace(segment))
                             .ToArray();
 
                         var match = methodMatches
-                            .FirstOrDefault(match => RouteMatch.RequestPathMatchesRouteTemplate(match.Attr.Template?.Split("/") ?? new string[0], routePath));
+                            .FirstOrDefault(match => RouteMatch.RequestPathMatchesRouteTemplate(match.Attr.GetTemplatePathSegments(), actionPathSegments));
 
-                        return new RouteMatch(controllerType, match.Method, match.Attr, requestPath);
+                        if (match != null)
+                            return new RouteMatch(controllerType, match.Method, match.Attr, requestPath);
+                        else
+                            throw new NotFoundException(
+                                $"Die angeforderte Resource:{controllerType} konnte unter dem Pfad:{requestPath} nicht gefunden werden.");
                     }
                 }
 

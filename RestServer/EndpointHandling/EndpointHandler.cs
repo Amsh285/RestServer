@@ -58,23 +58,15 @@ namespace RestServer.EndpointHandling
             {
                 string correspondingParameter = string.Empty;
 
-                if (!match.TemplatePathSegments.Contains($"{{{actionParameter.Name}}}"))
+                int actionParameterIndex = Array.IndexOf(match.TemplatePathSegments, $"{{{actionParameter.Name}}}");
+
+                if (actionParameterIndex == -1)
                 {
                     byte[] bodyContent = ExtractFromRequestBody(match, context, bodyExtractor, actionParameter);
                     correspondingParameter = Encoding.UTF8.GetString(bodyContent);
                 }
                 else
-                {
-                    if (context.Parameters.QueryStringValues.ContainsKey(actionParameter.Name))
-                        correspondingParameter = context.Parameters.QueryStringValues[actionParameter.Name];
-                    else if (context.Parameters.Headers.ContainsKey(actionParameter.Name))
-                        correspondingParameter = context.Parameters.Headers[actionParameter.Name];
-                    else
-                    {
-                        NotFoundException innerException = new NotFoundException($"Could not find Parameter.{actionParameter.Name} in QueryString oder Headers.");
-                        throw BuildEndpointHandlerException(match, innerException);
-                    }
-                }
+                    correspondingParameter = match.MatchingActionPathSegments[actionParameterIndex];
 
                 try
                 {

@@ -13,7 +13,7 @@ namespace RestServer.Controllers
         [HttpGet]
         public IActionResult GetMessages()
         {
-            return null;
+            return Ok();
         }
 
         [HttpGet("{messageId}")]

@@ -24,6 +24,7 @@ namespace RestServer.EndpointHandling
                 return MatchingPath
                     .Split("/")
                     .Skip(1)
+                    .Where(s => !string.IsNullOrWhiteSpace(s))
                     .ToArray();
             } 
         }
@@ -43,7 +44,7 @@ namespace RestServer.EndpointHandling
             Controller = controller ?? throw new ArgumentNullException(nameof(controller));
             Action = action ?? throw new ArgumentNullException(nameof(action));
             HttpMethod = httpMethod ?? throw new ArgumentNullException(nameof(httpMethod));
-            TemplatePathSegments = httpMethod.Template?.Split("/") ?? new string[0];
+            TemplatePathSegments = httpMethod.GetTemplatePathSegments();
             MatchingPath = matchingPath ?? throw new ArgumentNullException(nameof(matchingPath));
         }
 

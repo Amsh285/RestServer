@@ -1,4 +1,5 @@
-﻿using System;
+﻿using RestServer.Infrastructure;
+using System;
 
 namespace RestServer.EndpointHandling.Attributes
 {
@@ -7,13 +8,23 @@ namespace RestServer.EndpointHandling.Attributes
         public string Template { get; }
 
         public HttpMethodAttribute()
-            : this(null)
+            : this(string.Empty)
         {
         }
 
         public HttpMethodAttribute(string template)
         {
+            Assert.NotNull(template, nameof(template));
+
             Template = template;
+        }
+
+        public string[] GetTemplatePathSegments()
+        {
+            if (string.IsNullOrWhiteSpace(Template) || Template.Equals(".") || Template.Equals("./") || Template.Equals("/"))
+                return new string[0];
+
+            return Template.Split("/");
         }
     }
 }
