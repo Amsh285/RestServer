@@ -9,9 +9,15 @@ namespace RestServer.CommunicationObjects
     public sealed class JsonResult : IActionResult
     {
         public JsonResult(object dataTransferObject, TcpClient currentClient)
+            : this(dataTransferObject, currentClient, null)
+        {
+        }
+
+        public JsonResult(object dataTransferObject, TcpClient currentClient, JsonSerializerOptions serializerOptions)
         {
             this.dataTransferObject = dataTransferObject ?? throw new ArgumentNullException(nameof(dataTransferObject));
             this.currentClient = currentClient ?? throw new ArgumentNullException(nameof(currentClient));
+            this.serializerOptions = serializerOptions;
         }
 
         public void Execute()
@@ -19,7 +25,12 @@ namespace RestServer.CommunicationObjects
             NetworkStream responseStream = currentClient.GetStream();
             EnsureResponseStream(responseStream);
 
-            string payload = JsonSerializer.Serialize(dataTransferObject, dataTransferObject.GetType());
+            string payload = string.Empty;
+
+            if(serializerOptions != null)
+                payload = JsonSerializer.Serialize(dataTransferObject, dataTransferObject.GetType(), serializerOptions);
+            else
+                payload = JsonSerializer.Serialize(dataTransferObject, dataTransferObject.GetType());
 
             HttpResponseHeader responseHeader = new HttpResponseHeader(HttpStatusCode.OK, payload?.Length ?? 0, "Json");
             byte[] responseHeaderBytes = Encoding.UTF8.GetBytes(responseHeader.ToString());
@@ -40,5 +51,6 @@ namespace RestServer.CommunicationObjects
 
         private readonly object dataTransferObject;
         private readonly TcpClient currentClient;
+        private readonly JsonSerializerOptions serializerOptions;
     }
 }
