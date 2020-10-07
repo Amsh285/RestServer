@@ -18,7 +18,7 @@ namespace RestServer.CommunicationObjects
             EnsureResponseStream(responseStream);
 
             byte[] responseHeaderBytes = Encoding.UTF8.GetBytes(responseHeader.ToString());
-            responseStream.Write(responseHeaderBytes, 0, responseHeaderBytes.Length);
+            responseStream.Write(responseHeaderBytes);
 
             ExecuteResponsePayload(currentClient);
         }

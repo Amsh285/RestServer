@@ -10,6 +10,11 @@ namespace RestServer.EndpointHandling
             return HttpStatusCodeResult.Ok(client, message);
         }
 
+        protected IActionResult Created(string message = null)
+        {
+            return HttpStatusCodeResult.Created(client, message);
+        }
+
         protected IActionResult BadRequest(string errorMessage = null)
         {
             return HttpStatusCodeResult.BadRequest(client, errorMessage);
@@ -18,6 +23,11 @@ namespace RestServer.EndpointHandling
         protected IActionResult NotFound(string errorMessage = null)
         {
             return HttpStatusCodeResult.NotFound(client, errorMessage);
+        }
+
+        protected IActionResult Json(object value)
+        {
+            return new JsonResult(value, client);
         }
 
         // Could be better solved with an IoC- Container (instantiating Controllers with a transient clientfunc)

@@ -24,19 +24,24 @@ namespace RestServer.Controllers
             if (match == null)
                 return NotFound();
 
-            return null;
+            return Json(match);
         }
 
         [HttpPost]
         public IActionResult PostMessage(Message value)
         {
+            ++currentId;
+
+            value.Id = currentId;
             value.CreationDate = DateTime.Now;
             inMemoryMessages.Add(value);
 
-            return Ok();
+            return Created();
         }
 
+        private int currentId = 0;
+
         // lokal speichern stateless undso
-        private static List<Message> inMemoryMessages = new List<Message>(); 
+        private static List<Message> inMemoryMessages = new List<Message>();
     }
 }
