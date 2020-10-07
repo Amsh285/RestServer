@@ -3,6 +3,7 @@ using System;
 
 namespace RestServer.EndpointHandling.Attributes
 {
+    [AttributeUsage(validOn: AttributeTargets.Method, AllowMultiple = true, Inherited = true)]
     public abstract class HttpMethodAttribute : Attribute
     {
         public string Template { get; }

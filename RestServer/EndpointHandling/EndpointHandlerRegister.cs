@@ -43,7 +43,7 @@ namespace RestServer.EndpointHandling
                 {
                     //Todo: default e.g.: HomeController
                 }
-                else
+                else if (supportedMethodTypeMapping.Keys.Contains(context.Request.Method))
                 {
                     Type controllerType = registeredEndpointHandlerTypes
                         .FirstOrDefault(endPoint => IsRequestedControllerType(controller, endPoint));
@@ -58,27 +58,26 @@ namespace RestServer.EndpointHandling
                             innerException);
                     }
 
-                    if (context.Request.Method == HttpVerb.GET)
-                    {
-                        var methodMatches = controllerType.GetMethods(BindingFlags.Public | BindingFlags.Instance)
-                            .Where(m => m.IsDefined(typeof(HttpGetAttribute), false) && m.ReturnType == typeof(IActionResult))
-                            .Select(m => new {Method = m, Attr = (HttpGetAttribute)m.GetCustomAttribute(typeof(HttpGetAttribute))} )
-                            .ToArray();
+                    Type methodAttributeType = supportedMethodTypeMapping[context.Request.Method];
 
-                        string[] actionPathSegments = requestPathSegments
-                            .Skip(1)
-                            .Where(segment => !string.IsNullOrWhiteSpace(segment))
-                            .ToArray();
+                    var methodMatches = controllerType.GetMethods(BindingFlags.Public | BindingFlags.Instance)
+                        .Where(m => m.IsDefined(methodAttributeType, false) && m.ReturnType == typeof(IActionResult))
+                        .Select(m => new { Method = m, Attr = (HttpMethodAttribute)m.GetCustomAttribute(methodAttributeType) })
+                        .ToArray();
 
-                        var match = methodMatches
-                            .FirstOrDefault(match => RouteMatch.RequestPathMatchesRouteTemplate(match.Attr.GetTemplatePathSegments(), actionPathSegments));
+                    string[] actionPathSegments = requestPathSegments
+                        .Skip(1)
+                        .Where(segment => !string.IsNullOrWhiteSpace(segment))
+                        .ToArray();
 
-                        if (match != null)
-                            return new RouteMatch(controllerType, match.Method, match.Attr, requestPath);
-                        else
-                            throw new NotFoundException(
-                                $"Die angeforderte Resource:{controllerType} konnte unter dem Pfad:{requestPath} nicht gefunden werden.");
-                    }
+                    var match = methodMatches
+                        .FirstOrDefault(match => RouteMatch.RequestPathMatchesRouteTemplate(match.Attr.GetTemplatePathSegments(), actionPathSegments));
+
+                    if (match != null)
+                        return new RouteMatch(controllerType, match.Method, match.Attr, requestPath);
+                    else
+                        throw new NotFoundException(
+                            $"Die angeforderte Resource:{controllerType} konnte unter dem Pfad:{requestPath} nicht gefunden werden.");
                 }
 
                 throw new NotImplementedException($"{nameof(GetEndPointHandler)} not implemented yet");
@@ -104,5 +103,11 @@ namespace RestServer.EndpointHandling
         }
 
         private List<Type> registeredEndpointHandlerTypes = new List<Type>();
+
+        private static readonly IReadOnlyDictionary<HttpVerb, Type> supportedMethodTypeMapping =
+            new Dictionary<HttpVerb, Type>() {
+                { HttpVerb.GET, typeof(HttpGetAttribute) }, { HttpVerb.POST, typeof(HttpPostAttribute) },
+                { HttpVerb.PUT, typeof(HttpPutAttribute) }, { HttpVerb.DELETE, typeof(HttpDeleteAttribute) }
+            };
     }
 }

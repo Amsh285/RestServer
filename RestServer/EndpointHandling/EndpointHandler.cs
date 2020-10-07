@@ -191,6 +191,6 @@ namespace RestServer.EndpointHandling
                     innerException);
         }
 
-        private static readonly string[] supportedContentTypes = { "Json", "Text", "Text/Pain" };
+        private static readonly string[] supportedContentTypes = { "Json", "Text", "Text/Plain" };
     }
 }
