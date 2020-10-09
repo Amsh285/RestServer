@@ -10,11 +10,11 @@ namespace RestServer.EndpointHandling
 {
     public sealed class EndpointHandlerRegister
     {
-        public void RegisterTypes()
+        public EndpointHandlerRegister(IEnumerable<Type> endPointHandlerTypes)
         {
-            registeredEndpointHandlerTypes = Assembly.GetExecutingAssembly()
-                .GetTypes()
-                .Where(t => t.IsClass && t.IsSubclassOf(typeof(ControllerBase)))
+            Assert.NotNull(endPointHandlerTypes, nameof(endPointHandlerTypes));
+
+            this.registeredEndpointHandlerTypes = endPointHandlerTypes
                 .ToList();
         }
 
@@ -43,44 +43,34 @@ namespace RestServer.EndpointHandling
                 {
                     //Todo: default e.g.: HomeController
                 }
-                else if (supportedMethodTypeMapping.Keys.Contains(context.Request.Method))
+
+                Type controllerType = registeredEndpointHandlerTypes
+                    .FirstOrDefault(endPoint => IsRequestedControllerType(controller, endPoint));
+
+                if (controllerType == null)
                 {
-                    Type controllerType = registeredEndpointHandlerTypes
-                        .FirstOrDefault(endPoint => IsRequestedControllerType(controller, endPoint));
+                    NotFoundException innerException = new NotFoundException(
+                        $"Die angeforderte Resource:{controller} konnte nicht gefunden werden.");
 
-                    if (controllerType == null)
-                    {
-                        NotFoundException innerException = new NotFoundException(
-                            $"Die angeforderte Resource:{controller} konnte nicht gefunden werden.");
-
-                        throw new EndpointHandlerRegisterException(
-                            "Error resolving EndpointHandler. See InnerException.",
-                            innerException);
-                    }
-
-                    Type methodAttributeType = supportedMethodTypeMapping[context.Request.Method];
-
-                    var methodMatches = controllerType.GetMethods(BindingFlags.Public | BindingFlags.Instance)
-                        .Where(m => m.IsDefined(methodAttributeType, false) && m.ReturnType == typeof(IActionResult))
-                        .Select(m => new { Method = m, Attr = (HttpMethodAttribute)m.GetCustomAttribute(methodAttributeType) })
-                        .ToArray();
-
-                    string[] actionPathSegments = requestPathSegments
-                        .Skip(1)
-                        .Where(segment => !string.IsNullOrWhiteSpace(segment))
-                        .ToArray();
-
-                    var match = methodMatches
-                        .FirstOrDefault(match => RouteMatch.RequestPathMatchesRouteTemplate(match.Attr.GetTemplatePathSegments(), actionPathSegments));
-
-                    if (match != null)
-                        return new RouteMatch(controllerType, match.Method, match.Attr, requestPath);
-                    else
-                        throw new NotFoundException(
-                            $"Die angeforderte Resource:{controllerType} konnte unter dem Pfad:{requestPath} nicht gefunden werden.");
+                    throw new EndpointHandlerRegisterException(
+                        "Error resolving EndpointHandler. See InnerException.",
+                        innerException);
                 }
 
-                throw new NotImplementedException($"{nameof(GetEndPointHandler)} not implemented yet");
+                string[] actionPathSegments = requestPathSegments
+                    .Skip(1)
+                    .Where(segment => !string.IsNullOrWhiteSpace(segment))
+                    .ToArray();
+
+                try
+                {
+                    RouteActionMatch actionMatch = EndpointControllerReflector.SearchRouteActionMatch(actionPathSegments, context.Request.Method, controllerType);
+                    return new RouteMatch(actionMatch, requestPath);
+                }
+                catch (NotFoundException nfEx)
+                {
+                    throw new EndpointHandlerRegisterException($"Die angeforderte Resource:{controllerType} konnte unter dem Pfad:{requestPath} nicht gefunden werden.", nfEx);
+                }
             }
             else
             {
@@ -103,11 +93,5 @@ namespace RestServer.EndpointHandling
         }
 
         private List<Type> registeredEndpointHandlerTypes = new List<Type>();
-
-        private static readonly IReadOnlyDictionary<HttpVerb, Type> supportedMethodTypeMapping =
-            new Dictionary<HttpVerb, Type>() {
-                { HttpVerb.GET, typeof(HttpGetAttribute) }, { HttpVerb.POST, typeof(HttpPostAttribute) },
-                { HttpVerb.PUT, typeof(HttpPutAttribute) }, { HttpVerb.DELETE, typeof(HttpDeleteAttribute) }
-            };
     }
 }

@@ -25,8 +25,7 @@ namespace RestServer
             IServiceProvider serviceProvider = new HardcodedEmptyServiceProvider();
             EndpointHandler endpointHandler = new EndpointHandler(serviceProvider);
 
-            EndpointHandlerRegister handlerRegister = new EndpointHandlerRegister();
-            handlerRegister.RegisterTypes();
+            EndpointHandlerRegister handlerRegister = new EndpointHandlerRegister(ScanHandlerTypes());
 
             try
             {
@@ -115,22 +114,11 @@ namespace RestServer
             }
         }
 
-        private static void LogRequestBody(NetworkStream requestStream)
+        public static IEnumerable<Type> ScanHandlerTypes()
         {
-            // Test only
-            // Antworten werden in den gleichen Networkstream geschrieben daher muss dieser vorher komplett durchgelesen werden
-            // bevor man eine Antwort an den Client zurückschicken kann.
-            var builder = new StringBuilder();
-
-            while (requestStream.DataAvailable)
-            {
-                builder.Append(Convert.ToChar(requestStream.ReadByte()));
-            }
-
-            Console.WriteLine("Request-Body:");
-            Console.WriteLine("-----------------------------------------------------------------------------");
-            Console.WriteLine(builder);
-            Console.WriteLine("-----------------------------------------------------------------------------");
+            return Assembly.GetExecutingAssembly()
+                .GetTypes()
+                .Where(t => t.IsClass && t.IsSubclassOf(typeof(ControllerBase)));
         }
     }
 }
