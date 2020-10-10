@@ -6,7 +6,7 @@ using System.Net.Sockets;
 
 namespace RestServer.CommunicationObjects.CommunicationObjectBuilders
 {
-    internal static class RequestContextBuilder
+    public static class RequestContextBuilder
     {
         public static RequestContext BuildRequestContext(string requestHeaderText, NetworkStream requestStream)
         {
@@ -15,7 +15,7 @@ namespace RestServer.CommunicationObjects.CommunicationObjectBuilders
             if (requestStream == null)
                 throw new ArgumentNullException($"{nameof(requestStream)} cannot be null.");
 
-            string[] requestHeaderFields = requestHeaderText.ToString().Split(Environment.NewLine);
+            string[] requestHeaderFields = requestHeaderText.Split(Environment.NewLine);
             string[] requestLineSegments = requestHeaderFields
                 .First()
                 .Split(' ');

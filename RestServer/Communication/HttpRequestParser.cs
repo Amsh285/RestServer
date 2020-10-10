@@ -39,7 +39,7 @@ namespace RestServer.Communication
                 }
             }
 
-            string requestHeaderText = requestHeaderTextBuilder.ToString();
+            string requestHeaderText = RequestHeaderStringNormalizer.NormalizeForApplication(requestHeaderTextBuilder.ToString());
 
             Console.WriteLine(requestHeaderText);
 
