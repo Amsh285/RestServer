@@ -1,3 +1,5 @@
 /.vs/*
 /RestServer/obj/*
 /RestServer/bin/*
+/RestServer.Tests/bin/*
+/RestServer.Tests/obj/*

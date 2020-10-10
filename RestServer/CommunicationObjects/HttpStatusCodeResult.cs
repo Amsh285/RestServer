@@ -24,6 +24,11 @@ namespace RestServer.CommunicationObjects
             return StatusMessage(HttpStatusCode.OK, client, message);
         }
 
+        public static HttpStatusCodeResult Created(TcpClient client, string message = null)
+        {
+            return StatusMessage(HttpStatusCode.Created, client, message);
+        }
+
         public static HttpStatusCodeResult BadRequest(TcpClient client, string errorMessage = null)
         {
             return StatusMessage(HttpStatusCode.BadRequest, client, errorMessage);
@@ -42,8 +47,6 @@ namespace RestServer.CommunicationObjects
         public static HttpStatusCodeResult StatusMessage(HttpStatusCode status, TcpClient client, string message)
         {
             HttpResponseHeader responseHeader = new HttpResponseHeader(status, message?.Length ?? 0, "text, plain");
-            AddDefaultHeaderFields(responseHeader);
-
             return new HttpStatusCodeResult(client, responseHeader, message);
         }
 
@@ -55,18 +58,10 @@ namespace RestServer.CommunicationObjects
             if (message != null)
             {
                 NetworkStream stream = currentClient.GetStream();
-                byte[] responseMessageBytes = Encoding.UTF8.GetBytes(message, 0, 10);
+                byte[] responseMessageBytes = Encoding.UTF8.GetBytes(message);
 
                 stream.Write(responseMessageBytes);
             }
-        }
-
-        private static void AddDefaultHeaderFields(HttpResponseHeader responseHeader)
-        {
-            if (responseHeader == null)
-                throw new ArgumentNullException($"{nameof(responseHeader)} cannot be null.");
-
-            responseHeader.Add("Server", "Dorian Monster Duel Cards TM ©/ 1.3.3.7");
         }
 
         private readonly string message;

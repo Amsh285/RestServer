@@ -76,12 +76,12 @@ namespace RestServer.CommunicationObjects.CommunicationObjectBuilders
             KeyValuePair<string, string> exctractHeaderField(string value)
             {
                 string[] fieldValues = value.Split(':');
-                return new KeyValuePair<string, string>(fieldValues[0], fieldValues[1]);
+                return new KeyValuePair<string, string>(fieldValues[0].Trim(), fieldValues[1].Trim());
             };
 
             IEnumerable<KeyValuePair<string, string>> fields = requestHeaderFields
                 .Skip(1)
-                .Where(s => !string.IsNullOrWhiteSpace(s) && s.Contains(':'))
+                .Where(s => !string.IsNullOrWhiteSpace(s) && s.Contains(':') && !s.Split(':').Any(s => string.IsNullOrWhiteSpace(s)))
                 .Select(exctractHeaderField);
 
             return new Dictionary<string, string>(fields);

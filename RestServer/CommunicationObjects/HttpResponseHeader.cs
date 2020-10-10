@@ -27,6 +27,11 @@ namespace RestServer.CommunicationObjects
 
             responseHeader.Add(ContentLengthKey, contentLength.ToString());
             responseHeader.Add(ContentTypeKey, contentType);
+
+            IReadOnlyDictionary<string, string> defaultHeaderFields = GetDefaultHeaderFields();
+
+            foreach (KeyValuePair<string, string> defaultHeader in defaultHeaderFields)
+                responseHeader.Add(defaultHeader.Key, defaultHeader.Value);
         }
 
         public void Add(string key, string value)
@@ -56,6 +61,12 @@ namespace RestServer.CommunicationObjects
         public override string ToString()
         {
             return BuildResponseHeader();
+        }
+
+        //Todo: Config
+        private IReadOnlyDictionary<string, string> GetDefaultHeaderFields()
+        {
+            return new Dictionary<string, string>() { { "Server", "Dorian Monster Duel Cards TM ©/ 1.3.3.7" } };
         }
 
         private Dictionary<string, string> responseHeader = new Dictionary<string, string>();

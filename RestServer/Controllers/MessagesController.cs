@@ -13,7 +13,7 @@ namespace RestServer.Controllers
         [HttpGet]
         public IActionResult GetMessages()
         {
-            return null;
+            return Json(inMemoryMessages, new System.Text.Json.JsonSerializerOptions() { WriteIndented = true });
         }
 
         [HttpGet("{messageId}")]
@@ -24,19 +24,55 @@ namespace RestServer.Controllers
             if (match == null)
                 return NotFound();
 
-            return null;
+            return Json(match);
         }
 
         [HttpPost]
         public IActionResult PostMessage(Message value)
         {
+            ++currentId;
+
+            value.Id = currentId;
             value.CreationDate = DateTime.Now;
             inMemoryMessages.Add(value);
+
+            return Created();
+        }
+
+        [HttpPut("{messageId}")]
+        public IActionResult PutMessage(int messageId, Message newValue)
+        {
+            Message match = inMemoryMessages
+                .FirstOrDefault(m => m.Id == messageId);
+
+            if (match == null)
+                return NotFound();
+
+            match.Sender = newValue.Sender;
+            match.Recipient = newValue.Recipient;
+            match.Text = newValue.Text;
 
             return Ok();
         }
 
+        [HttpDelete("{messageId}")]
+        public IActionResult DeleteMessage(int messageId)
+        {
+            Message match = inMemoryMessages
+                .FirstOrDefault(m => m.Id == messageId);
+
+            if (match == null)
+                return NotFound();
+
+            inMemoryMessages.Remove(match);
+
+            return Ok();
+        }
+
+
+        private static int currentId = 0;
+
         // lokal speichern stateless undso
-        private static List<Message> inMemoryMessages = new List<Message>(); 
+        private static List<Message> inMemoryMessages = new List<Message>();
     }
 }

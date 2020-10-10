@@ -24,18 +24,18 @@ namespace RestServer.EndpointHandling
             if (match is null)
                 throw new ArgumentNullException($"{nameof(match)} cannot be null.", nameof(match));
 
-            if (match.Action is null)
+            if (match.ActionMatch.Action is null)
                 throw new ArgumentNullException($"match.HttpMethod.Template");
 
-            if (match.Action.ReturnType != typeof(IActionResult))
-                throw new NotSupportedException($"Invalid Match: Invalid Action ReturnType:{match.Action.ReturnType}. " +
+            if (match.ActionMatch.Action.ReturnType != typeof(IActionResult))
+                throw new NotSupportedException($"Invalid Match: Invalid Action ReturnType:{match.ActionMatch.Action.ReturnType}. " +
                     $"ReturnType must be {typeof(IActionResult)}");
 
-            if (match.HttpMethod == null)
-                throw new ArgumentNullException($"{nameof(match)}.{nameof(match.HttpMethod)} cannot be null.");
+            if (match.ActionMatch.HttpMethod == null)
+                throw new ArgumentNullException($"{nameof(match)}.{nameof(match.ActionMatch.HttpMethod)} cannot be null.");
 
-            if (match.HttpMethod.Template == null)
-                throw new ArgumentNullException($"{nameof(match)}.{nameof(match.HttpMethod)}.{nameof(match.HttpMethod.Template)} cannot be null.");
+            if (match.ActionMatch.HttpMethod.Template == null)
+                throw new ArgumentNullException($"{nameof(match)}.{nameof(match.ActionMatch.HttpMethod)}.{nameof(match.ActionMatch.HttpMethod.Template)} cannot be null.");
 
             if (client is null)
                 throw new ArgumentNullException($"{nameof(client)} cannot be null.", nameof(client));
@@ -54,27 +54,19 @@ namespace RestServer.EndpointHandling
             object controller = BuildController(match, client, context);
             List<object> invokeArguments = new List<object>();
 
-            foreach (ParameterInfo actionParameter in match.Action.GetParameters())
+            foreach (ParameterInfo actionParameter in match.ActionMatch.Action.GetParameters())
             {
                 string correspondingParameter = string.Empty;
 
-                if (!match.TemplatePathSegments.Contains($"{{{actionParameter.Name}}}"))
+                int actionParameterIndex = Array.IndexOf(match.TemplatePathSegments, $"{{{actionParameter.Name}}}");
+
+                if (actionParameterIndex == -1)
                 {
                     byte[] bodyContent = ExtractFromRequestBody(match, context, bodyExtractor, actionParameter);
                     correspondingParameter = Encoding.UTF8.GetString(bodyContent);
                 }
                 else
-                {
-                    if (context.Parameters.QueryStringValues.ContainsKey(actionParameter.Name))
-                        correspondingParameter = context.Parameters.QueryStringValues[actionParameter.Name];
-                    else if (context.Parameters.Headers.ContainsKey(actionParameter.Name))
-                        correspondingParameter = context.Parameters.Headers[actionParameter.Name];
-                    else
-                    {
-                        NotFoundException innerException = new NotFoundException($"Could not find Parameter.{actionParameter.Name} in QueryString oder Headers.");
-                        throw BuildEndpointHandlerException(match, innerException);
-                    }
-                }
+                    correspondingParameter = match.MatchingActionPathSegments[actionParameterIndex];
 
                 try
                 {
@@ -91,7 +83,7 @@ namespace RestServer.EndpointHandling
                 }
             }
 
-            return (IActionResult)match.Action.Invoke(controller, invokeArguments.ToArray());
+            return (IActionResult)match.ActionMatch.Action.Invoke(controller, invokeArguments.ToArray());
         }
 
         private static byte[] ExtractFromRequestBody(RouteMatch match, RequestContext context, RequestBodyExtractor bodyExtractor, ParameterInfo actionParameter)
@@ -131,13 +123,13 @@ namespace RestServer.EndpointHandling
 
         private object BuildController(RouteMatch match, TcpClient client, RequestContext context)
         {
-            ConstructorInfo constructor = match.Controller.GetConstructors()
+            ConstructorInfo constructor = match.ActionMatch.Controller.GetConstructors()
                 .First();
 
             List<object> parameters = ResolveConstructorParameters(match, client, context, constructor);
             object controller = constructor.Invoke(parameters.ToArray());
 
-            if (!match.Controller.IsSubclassOf(typeof(ControllerBase)))
+            if (!match.ActionMatch.Controller.IsSubclassOf(typeof(ControllerBase)))
                 return controller;
 
             FieldInfo clientField = typeof(ControllerBase).GetField("client", BindingFlags.NonPublic | BindingFlags.Instance);
@@ -191,14 +183,14 @@ namespace RestServer.EndpointHandling
             Assert.NotNull(match, nameof(match));
 
             if (info == null)
-                return new EndPointHandlerException($"Error Invoking Controller:{match.Controller}.{match.Action}.", innerException);
+                return new EndPointHandlerException($"Error Invoking Controller:{match.ActionMatch.Controller}.{match.ActionMatch.Action}.", innerException);
             else
                 return new EndPointHandlerException(
-                    $"Error Invoking Controller:{match.Controller}.{match.Action}.{Environment.NewLine}" +
+                    $"Error Invoking Controller:{match.ActionMatch.Controller}.{match.ActionMatch.Action}.{Environment.NewLine}" +
                     info,
                     innerException);
         }
 
-        private static readonly string[] supportedContentTypes = { "Json", "Text", "Text/Pain" };
+        private static readonly string[] supportedContentTypes = { "Json", "Text", "Text/Plain" };
     }
 }
