@@ -9,14 +9,27 @@ using System.Net;
 using System.Net.Sockets;
 using System.Reflection;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace RestServer
 {
     class Program
     {
+        public static CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
+
         static void Main(string[] args)
         {
             //127.0.0.1:13000
+            CancellationToken webServerRoutineCancellationToken = cancellationTokenSource
+                .Token;
+
+            Task result = Task.Run(ExecuteWebServer, webServerRoutineCancellationToken);
+            result.Wait();
+        }
+
+        private static void ExecuteWebServer()
+        {
             IPAddress localAddr = IPAddress.Parse("127.0.0.1");
             TcpListener listener = new TcpListener(localAddr, 13000);
 
@@ -39,78 +52,80 @@ namespace RestServer
 
             Console.WriteLine("Webserver wurde erfolgreich gestartet.");
 
-            byte[] readBuffer = new byte[1024];
-
             try
             {
                 while (true)
                 {
                     TcpClient client = listener.AcceptTcpClient();
-
-                    try
-                    {
-                        NetworkStream requestStream = client.GetStream();
-
-                        Console.WriteLine($"Nachricht erhalten um: {DateTime.Now} Client: {client.Client.RemoteEndPoint}");
-                        Console.WriteLine("-----------------------------------------------------------------------------");
-
-                        HttpRequestParser requestParser = new HttpRequestParser();
-                        RequestContext context;
-
-                        context = requestParser.ParseRequestStream(requestStream);
-
-                        Console.WriteLine("-----------------------------------------------------------------------------");
-                        Console.WriteLine();
-
-                        RouteMatch match = handlerRegister.GetEndPointHandler(context);
-
-                        if (match != null)
-                        {
-                            IActionResult result = endpointHandler.Invoke(match, client, context);
-                            result.Execute();
-                        }
-                        else
-                            HttpStatusCodeResult.NotFound(client)
-                                .Execute();
-
-                        client.Close();
-                    }
-                    catch (HttpRequestParserException parserEx)
-                    {
-                        string parseErrorMessage = $"Ungültiger Request, parsen nicht möglich: {parserEx.Message}";
-
-                        Console.WriteLine(parseErrorMessage);
-                        IActionResult parseError = HttpStatusCodeResult.BadRequest(client, parseErrorMessage);
-                    }
-                    catch (EndpointHandlerRegisterException endPointHandlerEx)
-                    {
-                        if(endPointHandlerEx.InnerException is FormatException fex)
-                        {
-                            HttpStatusCodeResult.BadRequest(client, fex.Message)
-                                .Execute();
-                        }
-                        else if(endPointHandlerEx.InnerException is NotFoundException nfex)
-                        {
-                            HttpStatusCodeResult.NotFound(client, nfex.Message)
-                                .Execute();
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine($"Unerwarteter Fehler: {ex.Message}");
-
-                        HttpStatusCodeResult.InternalServerError(client)
-                            .Execute();
-                    }
-                    finally
-                    {
-                        client.Close();
-                    }
+                    Task.Run(() => ProcessRequest(endpointHandler, handlerRegister, client));
                 }
             }
             finally
             {
                 listener.Stop();
+            }
+        }
+
+        private static void ProcessRequest(EndpointHandler endpointHandler, EndpointHandlerRegister handlerRegister, TcpClient client)
+        {
+            try
+            {
+                NetworkStream requestStream = client.GetStream();
+
+                Console.WriteLine($"Nachricht erhalten um: {DateTime.Now} Client: {client.Client.RemoteEndPoint}");
+                Console.WriteLine("-----------------------------------------------------------------------------");
+
+                HttpRequestParser requestParser = new HttpRequestParser();
+                RequestContext context;
+
+                context = requestParser.ParseRequestStream(requestStream);
+
+                Console.WriteLine("-----------------------------------------------------------------------------");
+                Console.WriteLine();
+
+                RouteMatch match = handlerRegister.GetEndPointHandler(context);
+
+                if (match != null)
+                {
+                    IActionResult result = endpointHandler.Invoke(match, client, context);
+                    result.Execute();
+                }
+                else
+                    HttpStatusCodeResult.NotFound(client)
+                        .Execute();
+
+                client.Close();
+            }
+            catch (HttpRequestParserException parserEx)
+            {
+                string parseErrorMessage = $"Ungültiger Request, parsen nicht möglich: {parserEx.Message}";
+
+                Console.WriteLine(parseErrorMessage);
+                IActionResult parseError = HttpStatusCodeResult.BadRequest(client, parseErrorMessage);
+            }
+            catch (EndpointHandlerRegisterException endPointHandlerEx)
+            {
+                if (endPointHandlerEx.InnerException is FormatException fex)
+                {
+                    HttpStatusCodeResult.BadRequest(client, fex.Message)
+                        .Execute();
+                }
+                else if (endPointHandlerEx.InnerException is NotFoundException nfex)
+                {
+                    HttpStatusCodeResult.NotFound(client, nfex.Message)
+                        .Execute();
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Unerwarteter Fehler: {ex.Message}");
+
+                HttpStatusCodeResult.InternalServerError(client)
+                    .Execute();
+            }
+            finally
+            {
+                client.Close();
             }
         }
 

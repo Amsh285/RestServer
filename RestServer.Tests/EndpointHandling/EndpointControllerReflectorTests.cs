@@ -17,6 +17,21 @@ namespace RestServer.UnitTests.EndpointHandling
         [TestCase("1", HttpVerb.GET)]
         [TestCase("1/SubResource", HttpVerb.GET)]
         [TestCase("1/SubResource/1", HttpVerb.GET)]
+        [TestCase("", HttpVerb.POST)]
+        [TestCase("SubResources", HttpVerb.POST)]
+        [TestCase("1", HttpVerb.POST)]
+        [TestCase("1/SubResource", HttpVerb.POST)]
+        [TestCase("1/SubResource/1", HttpVerb.POST)]
+        [TestCase("", HttpVerb.PUT)]
+        [TestCase("SubResources", HttpVerb.PUT)]
+        [TestCase("1", HttpVerb.PUT)]
+        [TestCase("1/SubResource", HttpVerb.PUT)]
+        [TestCase("1/SubResource/1", HttpVerb.PUT)]
+        [TestCase("", HttpVerb.DELETE)]
+        [TestCase("SubResources", HttpVerb.DELETE)]
+        [TestCase("1", HttpVerb.DELETE)]
+        [TestCase("1/SubResource", HttpVerb.DELETE)]
+        [TestCase("1/SubResource/1", HttpVerb.DELETE)]
         public void ActionRoutingWorksAsIntended(string actionRoute, HttpVerb method)
         {
             string[] actionRouteSegments = actionRoute
