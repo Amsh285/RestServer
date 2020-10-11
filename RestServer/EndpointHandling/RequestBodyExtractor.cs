@@ -39,7 +39,7 @@ namespace RestServer.EndpointHandling
 
                 throw error;
             }
-            
+
             if (Context.Content.ContentLength > 10 * 1024 * 1024)
             {
                 FormatException innerException = new FormatException("ContentLength is to long, only 10MB are allowed.");
@@ -70,9 +70,9 @@ namespace RestServer.EndpointHandling
             byte[] readBuffer = new byte[1024];
 
             int totalBytesRead = 0, totalBytesMoved = 0;
-            
+
             while (stream.DataAvailable)
-            { 
+            {
                 int bytesRead = stream.Read(readBuffer);
                 totalBytesRead += bytesRead;
 
@@ -82,7 +82,7 @@ namespace RestServer.EndpointHandling
                 Array.Copy(readBuffer, 0, bodyContent, totalBytesMoved, bytesRead);
                 totalBytesMoved = totalBytesRead;
             }
-            
+
             return bodyContent;
         }
 

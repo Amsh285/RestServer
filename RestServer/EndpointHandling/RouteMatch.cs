@@ -1,8 +1,5 @@
-﻿using RestServer.EndpointHandling.Attributes;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Linq;
-using System.Reflection;
 
 namespace RestServer.EndpointHandling
 {
@@ -11,18 +8,19 @@ namespace RestServer.EndpointHandling
         public RouteActionMatch ActionMatch { get; }
 
         public string[] TemplatePathSegments { get; }
-        
+
         public string MatchingPath { get; }
 
-        public string[] MatchingPathSegments { 
-            get 
-            { 
+        public string[] MatchingPathSegments
+        {
+            get
+            {
                 return MatchingPath
                     .Split("/")
                     .Skip(1)
                     .Where(s => !string.IsNullOrWhiteSpace(s))
                     .ToArray();
-            } 
+            }
         }
 
         public string[] MatchingActionPathSegments

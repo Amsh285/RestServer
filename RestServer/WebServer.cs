@@ -70,7 +70,7 @@ namespace RestServer
                     Task.Run(() => ProcessRequest(endpointHandler, handlerRegister, client));
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Console.WriteLine($"Error AcceptClient: {ex.Message}");
             }

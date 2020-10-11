@@ -27,7 +27,7 @@ namespace RestServer.CommunicationObjects
 
             string payload = string.Empty;
 
-            if(serializerOptions != null)
+            if (serializerOptions != null)
                 payload = JsonSerializer.Serialize(dataTransferObject, dataTransferObject.GetType(), serializerOptions);
             else
                 payload = JsonSerializer.Serialize(dataTransferObject, dataTransferObject.GetType());

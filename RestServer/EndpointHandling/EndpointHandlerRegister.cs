@@ -1,10 +1,8 @@
 ﻿using RestServer.CommunicationObjects;
-using RestServer.EndpointHandling.Attributes;
 using RestServer.Infrastructure;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 
 namespace RestServer.EndpointHandling
 {

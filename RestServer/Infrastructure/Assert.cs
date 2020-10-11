@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace RestServer.Infrastructure
 {
@@ -17,7 +16,7 @@ namespace RestServer.Infrastructure
         public static void ForEach<T>(IEnumerable<T> subject, Func<T, bool> condition, string errorMessage)
         {
             int index = 0;
-            
+
             foreach (T item in subject)
             {
                 That(condition(item), $"Invalid item at: {index}. {errorMessage}");

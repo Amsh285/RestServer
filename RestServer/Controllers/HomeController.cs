@@ -1,8 +1,5 @@
 ﻿using RestServer.CommunicationObjects;
 using RestServer.EndpointHandling;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace RestServer.Controllers
 {
