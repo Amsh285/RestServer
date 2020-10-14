@@ -1,4 +1,5 @@
-﻿using RestServer.EndpointHandling;
+﻿using RestServer.WebServer;
+using RestServer.WebServer.EndpointHandling;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,7 +18,7 @@ namespace RestServer
             List<Type> handlerTypes = ScanHandlerTypes()
                 .ToList();
 
-            WebServer server = new WebServer(IPAddress.Parse("127.0.0.1"), 13000, handlerTypes);
+            HttpWebServer server = new HttpWebServer(IPAddress.Parse("127.0.0.1"), 13000, handlerTypes, new HardcodedEmptyServiceProvider());
             Task result = server.Start();
             result.Wait();
         }

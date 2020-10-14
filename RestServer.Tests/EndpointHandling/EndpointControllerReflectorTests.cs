@@ -1,8 +1,8 @@
 ﻿using NUnit.Framework;
-using RestServer.CommunicationObjects;
-using RestServer.EndpointHandling;
-using RestServer.EndpointHandling.Attributes;
 using RestServer.Tests;
+using RestServer.WebServer.CommunicationObjects;
+using RestServer.WebServer.EndpointHandling;
+using RestServer.WebServer.EndpointHandling.Attributes;
 using System;
 using System.Collections.Generic;
 using System.Linq;

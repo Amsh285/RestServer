@@ -1,5 +1,5 @@
 ﻿using NUnit.Framework;
-using RestServer.Communication;
+using RestServer.WebServer.Communication;
 using System;
 
 namespace RestServer.UnitTests.Communication

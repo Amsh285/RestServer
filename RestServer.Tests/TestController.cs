@@ -1,6 +1,6 @@
-﻿using RestServer.CommunicationObjects;
-using RestServer.EndpointHandling;
-using RestServer.EndpointHandling.Attributes;
+﻿using RestServer.WebServer.CommunicationObjects;
+using RestServer.WebServer.EndpointHandling;
+using RestServer.WebServer.EndpointHandling.Attributes;
 
 namespace RestServer.Tests
 {

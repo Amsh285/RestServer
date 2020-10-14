@@ -1,7 +1,7 @@
-﻿using RestServer.CommunicationObjects;
-using RestServer.EndpointHandling;
-using RestServer.EndpointHandling.Attributes;
-using RestServer.Models;
+﻿using RestServer.Models;
+using RestServer.WebServer.CommunicationObjects;
+using RestServer.WebServer.EndpointHandling;
+using RestServer.WebServer.EndpointHandling.Attributes;
 using System;
 using System.Collections.Generic;
 using System.Linq;

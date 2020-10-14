@@ -1,0 +1,9 @@
+C:\Users\User\OneDrive\Documents\WS2020Lokal\RestServer\RestServer.WebServer\bin\Debug\netcoreapp3.1\RestServer.Server.deps.json
+C:\Users\User\OneDrive\Documents\WS2020Lokal\RestServer\RestServer.WebServer\bin\Debug\netcoreapp3.1\RestServer.Server.dll
+C:\Users\User\OneDrive\Documents\WS2020Lokal\RestServer\RestServer.WebServer\bin\Debug\netcoreapp3.1\RestServer.Server.pdb
+C:\Users\User\OneDrive\Documents\WS2020Lokal\RestServer\RestServer.WebServer\obj\Debug\netcoreapp3.1\RestServer.Server.csprojAssemblyReference.cache
+C:\Users\User\OneDrive\Documents\WS2020Lokal\RestServer\RestServer.WebServer\obj\Debug\netcoreapp3.1\RestServer.Server.AssemblyInfoInputs.cache
+C:\Users\User\OneDrive\Documents\WS2020Lokal\RestServer\RestServer.WebServer\obj\Debug\netcoreapp3.1\RestServer.Server.AssemblyInfo.cs
+C:\Users\User\OneDrive\Documents\WS2020Lokal\RestServer\RestServer.WebServer\obj\Debug\netcoreapp3.1\RestServer.Server.csproj.CoreCompileInputs.cache
+C:\Users\User\OneDrive\Documents\WS2020Lokal\RestServer\RestServer.WebServer\obj\Debug\netcoreapp3.1\RestServer.Server.dll
+C:\Users\User\OneDrive\Documents\WS2020Lokal\RestServer\RestServer.WebServer\obj\Debug\netcoreapp3.1\RestServer.Server.pdb

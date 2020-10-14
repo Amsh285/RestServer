@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Infrastructure\Extensions\" />
+    <ProjectReference Include="..\RestServer.WebServer\RestServer.WebServer.csproj" />
   </ItemGroup>
 
 </Project>

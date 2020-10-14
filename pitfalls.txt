@@ -1,0 +1,6 @@
+- Große Infrastruktur nötig (Wartung, Requestpipeline, Siterendering)
+- Resourcensicherheit (inmemory bzw Filesystem)/ cross site requests/ Autentfizierung u. Autorisierung)
+- multithreading/ cpu resourcen/ performance
+- logging/ Fehlererkennung/ Benachrichtung
+
+- Tcpclient Programmierungsdetails -> sehr fehleranfällig erfordert sehr viele tests. Schwierig auf anhieb eine saubere Fehlerbehandlung zu implementieren.

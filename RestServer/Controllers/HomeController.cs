@@ -1,5 +1,5 @@
-﻿using RestServer.CommunicationObjects;
-using RestServer.EndpointHandling;
+﻿using RestServer.WebServer.CommunicationObjects;
+using RestServer.WebServer.EndpointHandling;
 
 namespace RestServer.Controllers
 {
