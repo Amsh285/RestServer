@@ -5,3 +5,7 @@
 /RestServer.Tests/obj/*
 /RestServer.WebServer/bin/*
 /RestServer.WebServer/obj/*
+/MonsterTradingCardGame/bin/*
+/MonsterTradingCardGame/obj/*
+/MonsterTradingCardGame.UnitTests/bin/*
+/MonsterTradingCardGame.UnitTests/obj/*
