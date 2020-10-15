@@ -3,3 +3,5 @@
 /RestServer/bin/*
 /RestServer.Tests/bin/*
 /RestServer.Tests/obj/*
+/RestServer.WebServer/bin/*
+/RestServer.WebServer/obj/*
