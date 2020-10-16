@@ -43,10 +43,8 @@ namespace RestServer.WebServer
 
         private void ExecuteWebServer()
         {
-            IPAddress localAddr = IPAddress.Parse("127.0.0.1");
-            TcpListener listener = new TcpListener(localAddr, 13000);
-
-            Console.WriteLine("Starte WebServer auf 127.0.0.1:13000.");
+            TcpListener listener = new TcpListener(Address, Port);
+            Console.WriteLine($"Starte WebServer auf {Address}:{Port}.");
 
             EndpointHandler endpointHandler = new EndpointHandler(ServiceProvider);
             EndpointHandlerRegister handlerRegister = new EndpointHandlerRegister(HandlerTypes);
