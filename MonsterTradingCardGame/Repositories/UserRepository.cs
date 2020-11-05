@@ -3,8 +3,8 @@ using MasterTradingCardGame.Models;
 using MonsterTradingCardGame.Infrastructure;
 using Npgsql;
 using RestServer.WebServer.Infrastructure;
-using System.Collections.Generic;
 using System.Security.Cryptography;
+using System.Text;
 
 namespace MasterTradingCardGame.Repositories
 {
@@ -21,7 +21,7 @@ namespace MasterTradingCardGame.Repositories
                 cryptoServiceProvider.GetBytes(salt);
             }
 
-            byte[] passwordHash = SHA256PasswordService.GenerateHash(newUser.Password, salt);
+            byte[] passwordHash = SHA256PasswordService.GenerateHash(Encoding.UTF8.GetBytes(newUser.Password), salt);
 
             using (NpgsqlConnection connection = database.CreateAndOpenConnection())
             using(NpgsqlTransaction transaction = connection.BeginTransaction())

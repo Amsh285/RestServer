@@ -62,8 +62,13 @@ namespace RestServer.WebServer.EndpointHandling
 
                 if (actionParameterIndex == -1)
                 {
-                    byte[] bodyContent = ExtractFromRequestBody(match, context, bodyExtractor, actionParameter);
-                    correspondingParameter = Encoding.UTF8.GetString(bodyContent);
+                    if (context.RequestHeaderFields.ContainsKey(actionParameter.Name))
+                        correspondingParameter = ExtractFromRequestHeader(context, actionParameter);
+                    else
+                    {
+                        byte[] bodyContent = ExtractFromRequestBody(match, context, bodyExtractor, actionParameter);
+                        correspondingParameter = Encoding.UTF8.GetString(bodyContent);
+                    }
                 }
                 else
                     correspondingParameter = match.MatchingActionPathSegments[actionParameterIndex];
@@ -84,6 +89,16 @@ namespace RestServer.WebServer.EndpointHandling
             }
 
             return (IActionResult)match.ActionMatch.Action.Invoke(controller, invokeArguments.ToArray());
+        }
+
+        private static string ExtractFromRequestHeader(RequestContext context, ParameterInfo actionParameter)
+        {
+            string headerValue = context.RequestHeaderFields[actionParameter.Name];
+
+            if (actionParameter.ParameterType == typeof(string))
+                return $"\"{headerValue}\"";
+            else
+                return headerValue;
         }
 
         private static byte[] ExtractFromRequestBody(RouteMatch match, RequestContext context, RequestBodyExtractor bodyExtractor, ParameterInfo actionParameter)
