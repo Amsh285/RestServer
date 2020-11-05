@@ -2,10 +2,12 @@
 using RestServer.WebServer.CommunicationObjects;
 using RestServer.WebServer.EndpointHandling;
 using RestServer.WebServer.Infrastructure;
+using RestServer.WebServer.Infrastructure.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -116,18 +118,10 @@ namespace RestServer.WebServer
                 Console.WriteLine(parseErrorMessage);
                 IActionResult parseError = HttpStatusCodeResult.BadRequest(client, parseErrorMessage);
             }
-            catch (EndpointHandlerRegisterException endPointHandlerEx)
+            catch (Exception ex) when (ex is EndPointHandlerException || ex is EndpointHandlerRegisterException)
             {
-                if (endPointHandlerEx.InnerException is FormatException fex)
-                {
-                    HttpStatusCodeResult.BadRequest(client, fex.Message)
-                        .Execute();
-                }
-                else if (endPointHandlerEx.InnerException is NotFoundException nfex)
-                {
-                    HttpStatusCodeResult.NotFound(client, nfex.Message)
-                        .Execute();
-                }
+                HttpStatusCodeResult.BadRequest(client, ex.GetFullMessage(verbose: true))
+                    .Execute();
             }
             catch (Exception ex)
             {

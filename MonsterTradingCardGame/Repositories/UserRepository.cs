@@ -1,7 +1,9 @@
 ﻿using MasterTradingCardGame.Database;
 using MasterTradingCardGame.Models;
+using MonsterTradingCardGame.Infrastructure;
 using Npgsql;
 using RestServer.WebServer.Infrastructure;
+using System.Collections.Generic;
 using System.Security.Cryptography;
 
 namespace MasterTradingCardGame.Repositories
@@ -12,30 +14,36 @@ namespace MasterTradingCardGame.Repositories
         {
             Assert.NotNull(newUser, nameof(newUser));
 
-            byte[] passwordHash;
+            byte[] salt = new byte[32];
 
-            using (SHA256 sha256 = SHA256.Create())
+            using (RNGCryptoServiceProvider cryptoServiceProvider = new RNGCryptoServiceProvider())
             {
-                passwordHash = sha256.ComputeHash(newUser.Password);
+                cryptoServiceProvider.GetBytes(salt);
             }
 
-            using(NpgsqlConnection connection = database.CreateAndOpenConnection())
+            byte[] passwordHash = SHA256PasswordService.GenerateHash(newUser.Password, salt);
+
+            using (NpgsqlConnection connection = database.CreateAndOpenConnection())
             using(NpgsqlTransaction transaction = connection.BeginTransaction())
             {
                 
                 if(!UserNameExists(newUser, transaction))
                 {
-                    string insertUserStatement = @"INSERT INTO public.""User""(""FirstName"", ""LastName"", ""UserName"", ""Password"")
-	                            VALUES(@firstName, @lastName, @userName, @password); ";
+                    string insertUserStatement = @"INSERT INTO public.""User""(""FirstName"", ""LastName"", ""UserName"", ""Email"", ""Password"",
+                                ""Salt"", ""HashAlgorithm"", ""Coins"")
+	                            VALUES(@firstName, @lastName, @userName, @email, @password, @salt, @hashAlgorithm, @coins); ";
 
                     database.ExecuteNonQuery(insertUserStatement, transaction,
                         new NpgsqlParameter("firstName", newUser.FirstName),
                         new NpgsqlParameter("lastName", newUser.LastName),
                         new NpgsqlParameter("userName", newUser.UserName),
-                        new NpgsqlParameter("password", passwordHash)
+                        new NpgsqlParameter("email", newUser.Email),
+                        new NpgsqlParameter("password", passwordHash),
+                        new NpgsqlParameter("salt", salt),
+                        new NpgsqlParameter("hashAlgorithm", "SHA256"),
+                        new NpgsqlParameter("coins", 20)
                     );
 
-                    // Für Sql Server passiert das im Finally normalerweise.
                     transaction.Commit();
                 }
                 else

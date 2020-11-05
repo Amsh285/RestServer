@@ -8,6 +8,8 @@
 
         public string LastName { get; set; }
 
+        public string Email { get; set; }
+
         // Passwörter sollten nicht als Strings gespeichert werden.
         // SecureString wäre die Musterlösung ist aber nicht einfach und bringt nicht unbedingt sehr viel Mehrwert.
         // https://docs.microsoft.com/en-us/dotnet/api/system.security.securestring?view=netcore-3.1
