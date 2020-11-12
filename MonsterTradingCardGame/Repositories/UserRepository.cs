@@ -57,7 +57,7 @@ namespace MasterTradingCardGame.Repositories
             }
         }
 
-        private static bool UserNameExists(RegisterUser registerUser, NpgsqlTransaction transaction)
+        private static bool UserNameExists(RegisterUser registerUser, NpgsqlTransaction transaction = null)
         {
             return database.ExecuteScalar<bool>(@"SELECT EXISTS(
                 SELECT ""User_ID""
@@ -68,7 +68,7 @@ namespace MasterTradingCardGame.Repositories
             );
         }
 
-        public User GetUser(string userName, NpgsqlTransaction transaction)
+        public User GetUser(string userName, NpgsqlTransaction transaction = null)
         {
             return GetUsersWhere("\"UserName\" = @userName", transaction, new NpgsqlParameter("userName", userName))
                 .FirstOrDefault();
@@ -92,9 +92,7 @@ namespace MasterTradingCardGame.Repositories
             {
                 using (NpgsqlConnection connection = database.CreateAndOpenConnection())
                 using (transaction = connection.BeginTransaction())
-                {
                     return database.Execute(sql.ToString(), transaction, ReadUserRow, parameters);
-                }
             }
         }
 

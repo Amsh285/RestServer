@@ -21,23 +21,24 @@ namespace MonsterTradingCardGame.Controllers
         [HttpPost]
         public IActionResult Login(string username, string password)
         {
-            if(requestContext.Parameters.Headers.ContainsKey(AuthenticationTokenKey))
+            LoginResult result = userEntity.Login(username, Encoding.UTF8.GetBytes(password));
+            Assert.NotNull(result, nameof(result));
+
+            if (result.AuthenticationResult == AuthenticationResult.Failed)
+                return Unauthorized("Authentication Failed.");
+            else if (result.AuthenticationResult == AuthenticationResult.AlreadyLoggedIn)
                 return Ok("Already logged in.");
-
-            if (userEntity.Authenticate(username, Encoding.UTF8.GetBytes(password)))
-            {
-                return AuthenticationSuccess();
-            }
-
-            return Unauthorized("Authentication Failed.");
+            else
+                return AuthenticationSuccess(result.AuthenticationToken);
         }
 
-        private IActionResult AuthenticationSuccess()
+        private IActionResult AuthenticationSuccess(Guid authenticationToken)
         {
             string epirationDate = $"{DateTime.Now.AddMinutes(2).ToString("ddd, dd MMM yyy HH:mm:ss", new CultureInfo("En-en"))} GMT";
 
             StringBuilder authenticationCookieContent = new StringBuilder();
-            authenticationCookieContent.Append($"{AuthenticationTokenKey}=Test12345;");
+            authenticationCookieContent.Append($"{AuthenticationTokenKey}={authenticationToken};");
+            //authenticationCookieContent.Append($"Domain=http://DoriansBadgerDen.at;");
             authenticationCookieContent.Append($"expires={epirationDate}");
 
             IActionResult result = Ok("Authentication Successful.");
