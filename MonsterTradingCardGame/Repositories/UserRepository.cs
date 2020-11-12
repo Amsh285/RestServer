@@ -70,13 +70,13 @@ namespace MasterTradingCardGame.Repositories
 
         public User GetUser(string userName, NpgsqlTransaction transaction)
         {
-            return GetUsersWhere("UserName = @userName", transaction, new NpgsqlParameter("userName", userName))
-                .First();
+            return GetUsersWhere("\"UserName\" = @userName", transaction, new NpgsqlParameter("userName", userName))
+                .FirstOrDefault();
         }
 
         private IEnumerable<User> GetUsersWhere(string whereCondition, NpgsqlTransaction transaction, params NpgsqlParameter[] parameters)
         {
-            const string statement = @"SELECT * FROM public.User";
+            const string statement = @"SELECT * FROM public.""User""";
             StringBuilder sql = new StringBuilder();
             sql.AppendLine(statement);
 

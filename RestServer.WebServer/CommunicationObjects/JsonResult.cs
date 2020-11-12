@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -20,6 +21,11 @@ namespace RestServer.WebServer.CommunicationObjects
             this.serializerOptions = serializerOptions;
         }
 
+        public void AddHeaderEntry(string key, string value)
+        {
+            tempHeaderEntries.Add(KeyValuePair.Create(key, value));
+        }
+
         public void Execute()
         {
             NetworkStream responseStream = currentClient.GetStream();
@@ -33,6 +39,8 @@ namespace RestServer.WebServer.CommunicationObjects
                 payload = JsonSerializer.Serialize(dataTransferObject, dataTransferObject.GetType());
 
             HttpResponseHeader responseHeader = new HttpResponseHeader(HttpStatusCode.OK, payload?.Length ?? 0, "Json");
+            responseHeader.AddRange(tempHeaderEntries);
+
             byte[] responseHeaderBytes = Encoding.UTF8.GetBytes(responseHeader.ToString());
             responseStream.Write(responseHeaderBytes);
 
@@ -52,5 +60,7 @@ namespace RestServer.WebServer.CommunicationObjects
         private readonly object dataTransferObject;
         private readonly TcpClient currentClient;
         private readonly JsonSerializerOptions serializerOptions;
+
+        private readonly List<KeyValuePair<string, string>> tempHeaderEntries = new List<KeyValuePair<string, string>>();
     }
 }

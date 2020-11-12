@@ -1,4 +1,5 @@
-﻿using System;
+﻿using RestServer.WebServer.Infrastructure;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -39,6 +40,14 @@ namespace RestServer.WebServer.CommunicationObjects
             responseHeader.Add(key, value);
         }
 
+        public void AddRange(IEnumerable<KeyValuePair<string, string>> headerEntries)
+        {
+            Assert.NotNull(headerEntries, nameof(headerEntries));
+
+            foreach (KeyValuePair<string, string> headerEntry in headerEntries)
+                Add(headerEntry.Key, headerEntry.Value);
+        }
+
         private string BuildResponseHeaderLine()
         {
             return $"HTTP/1.1 {(int)Status} {Enum.GetName(typeof(HttpStatusCode), Status)}";
@@ -69,6 +78,7 @@ namespace RestServer.WebServer.CommunicationObjects
             return new Dictionary<string, string>() { { "Server", "Dorian Monster Duel Cards TM ©/ 1.3.3.7" } };
         }
 
+        //Todo: Refactor to multimap
         private Dictionary<string, string> responseHeader = new Dictionary<string, string>();
         private const string ContentLengthKey = "Content - length";
         private const string ContentTypeKey = "Content - type";
