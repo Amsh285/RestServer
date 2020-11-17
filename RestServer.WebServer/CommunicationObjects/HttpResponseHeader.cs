@@ -13,9 +13,9 @@ namespace RestServer.WebServer.CommunicationObjects
 
         public HttpStatusCode Status { get; }
 
-        public int ContentLength { get { return int.Parse(responseHeader[ContentLengthKey]); } }
+        public int ContentLength { get { return int.Parse(responseHeader[ContentLengthKey].First()); } }
 
-        public string ContentType { get { return responseHeader[ContentTypeKey]; } }
+        public string ContentType { get { return responseHeader[ContentTypeKey].First(); } }
 
         public HttpResponseHeader(HttpStatusCode status, int contentLength, string contentType)
         {
@@ -58,8 +58,9 @@ namespace RestServer.WebServer.CommunicationObjects
             StringBuilder responseHeaderBuilder = new StringBuilder();
             responseHeaderBuilder.AppendLine(BuildResponseHeaderLine());
 
-            foreach (KeyValuePair<string, string> headerField in responseHeader.Where(pair => !pair.Key.Equals(ContentLengthKey, StringComparison.OrdinalIgnoreCase)))
-                responseHeaderBuilder.AppendLine($"{headerField.Key}: {headerField.Value}");
+            foreach (KeyValuePair<string, List<string>> headerField in responseHeader.Where(pair => !pair.Key.Equals(ContentLengthKey, StringComparison.OrdinalIgnoreCase)))
+            foreach (string value in headerField.Value)
+                responseHeaderBuilder.AppendLine($"{headerField.Key}: {value}");
 
             responseHeaderBuilder.AppendLine($"{ContentLengthKey}: {ContentLength}");
             responseHeaderBuilder.AppendLine(string.Empty);
@@ -78,8 +79,7 @@ namespace RestServer.WebServer.CommunicationObjects
             return new Dictionary<string, string>() { { "Server", "Dorian Monster Duel Cards TM ©/ 1.3.3.7" } };
         }
 
-        //Todo: Refactor to multimap
-        private Dictionary<string, string> responseHeader = new Dictionary<string, string>();
+        private Multimap<string, string> responseHeader = new Multimap<string, string>();
         private const string ContentLengthKey = "Content - length";
         private const string ContentTypeKey = "Content - type";
     }

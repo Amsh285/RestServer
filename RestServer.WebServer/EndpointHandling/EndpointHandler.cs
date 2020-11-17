@@ -62,7 +62,7 @@ namespace RestServer.WebServer.EndpointHandling
 
                 if (actionParameterIndex == -1)
                 {
-                    if (context.RequestHeaderFields.ContainsKey(actionParameter.Name))
+                    if (context.Parameters.HeaderEntries.ContainsKey(actionParameter.Name))
                         correspondingParameter = ExtractFromRequestHeader(context, actionParameter);
                     else
                     {
@@ -93,7 +93,7 @@ namespace RestServer.WebServer.EndpointHandling
 
         private static string ExtractFromRequestHeader(RequestContext context, ParameterInfo actionParameter)
         {
-            string headerValue = context.RequestHeaderFields[actionParameter.Name];
+            string headerValue = context.Parameters.HeaderEntries[actionParameter.Name].First();
 
             if (actionParameter.ParameterType == typeof(string))
                 return $"\"{headerValue}\"";

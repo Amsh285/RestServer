@@ -5,10 +5,11 @@ using MonsterTradingCardGame.Infrastructure;
 using MonsterTradingCardGame.Models;
 using MonsterTradingCardGame.Repositories;
 using Npgsql;
+using RestServer.WebServer.CommunicationObjects;
 using RestServer.WebServer.Infrastructure;
 using System;
 
-namespace MonsterTradingCardGame.Entities
+namespace MonsterTradingCardGame.Entities.UserEntity
 {
     public sealed class UserEntity
     {
@@ -25,21 +26,58 @@ namespace MonsterTradingCardGame.Entities
             using (NpgsqlConnection connection = database.CreateAndOpenConnection())
             using (NpgsqlTransaction transaction = connection.BeginTransaction())
             {
-                AuthenticationResult result = Authenticate(userName, password, transaction);
-
-                //Todo: Handle numberOfFailedLoginAttempts
-                if (result == AuthenticationResult.Failed)
-                    return LoginResult.LoginFailed(numberOfFailedLoginAttempts: 0);
-                else if (result == AuthenticationResult.AlreadyLoggedIn)
-                    return LoginResult.AlreadyLoggedIn();
-                else
+                try
                 {
-                    Guid authenticationToken = Guid.NewGuid();
-                    StoreAuthenticationSessionToken(authenticationToken, userName, transaction);
+                    AuthenticationResult result = Authenticate(userName, password, transaction);
 
-                    return LoginResult.Success(authenticationToken);
+                    //Todo: Handle numberOfFailedLoginAttempts
+                    if (result == AuthenticationResult.Failed)
+                        return LoginResult.LoginFailed(numberOfFailedLoginAttempts: 0);
+                    else if (result == AuthenticationResult.AlreadyLoggedIn)
+                        return LoginResult.AlreadyLoggedIn();
+                    else
+                    {
+                        Guid authenticationToken = Guid.NewGuid();
+                        DateTime authenticationTokenExpirationDate = DateTime.Now.AddDays(1);
+
+                        StoreAuthenticationSessionToken(authenticationToken, authenticationTokenExpirationDate, userName, transaction);
+                        transaction.Commit();
+
+                        return LoginResult.Success(authenticationToken, authenticationTokenExpirationDate);
+                    }
+                }
+                catch (Exception)
+                {
+                    transaction.Rollback();
+                    throw;
                 }
             }
+        }
+
+        public LogoutResult Logout(RequestContext context)
+        {
+            Assert.NotNull(context, nameof(context));
+
+            using (NpgsqlConnection connection = database.CreateAndOpenConnection())
+            using (NpgsqlTransaction transaction = connection.BeginTransaction())
+            {
+                try
+                {
+                    //UserSession session = userSessionRepository.GetUserSessionByToken(, transaction);
+
+                    //if (session == null)
+                    //    return LogoutResult.NotLoggedIn;
+
+
+                }
+                catch (Exception)
+                {
+                    transaction.Rollback();
+                    throw;
+                }
+            }
+
+            return LogoutResult.Success;
         }
 
         public AuthenticationResult Authenticate(string userName, byte[] password, NpgsqlTransaction transaction)
@@ -67,7 +105,7 @@ namespace MonsterTradingCardGame.Entities
             return AuthenticationResult.Success;
         }
 
-        public void StoreAuthenticationSessionToken(Guid token, string userName, NpgsqlTransaction transaction = null)
+        public void StoreAuthenticationSessionToken(Guid token, DateTime expirationDate, string userName, NpgsqlTransaction transaction = null)
         {
             Assert.NotNull(userName, nameof(userName));
 
@@ -83,7 +121,7 @@ namespace MonsterTradingCardGame.Entities
                     $"New Session cannot be created. Session: Id - {latestSession.UserSessionID}, Guid - {latestSession.Token} is still active."
                 );
 
-            userSessionRepository.InsertNew(match.UserID, token, DateTime.Now.AddDays(1), transaction);
+            userSessionRepository.InsertNew(match.UserID, token, expirationDate, transaction);
         }
 
         private static readonly UserRepository userRepository = new UserRepository();

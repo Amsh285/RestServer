@@ -1,4 +1,4 @@
-﻿using MonsterTradingCardGame.Entities;
+﻿using MonsterTradingCardGame.Entities.UserEntity;
 using RestServer.WebServer.CommunicationObjects;
 using RestServer.WebServer.EndpointHandling;
 using RestServer.WebServer.EndpointHandling.Attributes;
@@ -29,20 +29,36 @@ namespace MonsterTradingCardGame.Controllers
             else if (result.AuthenticationResult == AuthenticationResult.AlreadyLoggedIn)
                 return Ok("Already logged in.");
             else
-                return AuthenticationSuccess(result.AuthenticationToken);
+            {
+                Assert.NotNull(result.AuthenticationToken, nameof(result.AuthenticationToken));
+                Assert.NotNull(result.AuthenticationTokenExpirationDate, nameof(result.AuthenticationTokenExpirationDate));
+                return AuthenticationSuccess(result.AuthenticationToken.Value, result.AuthenticationTokenExpirationDate.Value);
+            }
         }
 
-        private IActionResult AuthenticationSuccess(Guid authenticationToken)
+        [HttpPost("Logout")]
+        public IActionResult Logout()
+        {
+            LogoutResult result = userEntity.Logout(requestContext);
+
+            if (result == LogoutResult.NotLoggedIn)
+                return Ok("Logout failed not logged in.");
+
+            return Ok("Logout Successful.");
+        }
+
+        private IActionResult AuthenticationSuccess(Guid authenticationToken, DateTime authenticationTokenExpirationDate)
         {
             string epirationDate = $"{DateTime.Now.AddMinutes(2).ToString("ddd, dd MMM yyy HH:mm:ss", new CultureInfo("En-en"))} GMT";
 
             StringBuilder authenticationCookieContent = new StringBuilder();
             authenticationCookieContent.Append($"{AuthenticationTokenKey}={authenticationToken};");
             //authenticationCookieContent.Append($"Domain=http://DoriansBadgerDen.at;");
-            authenticationCookieContent.Append($"expires={epirationDate}");
+            authenticationCookieContent.Append($"expires={authenticationTokenExpirationDate}");
 
             IActionResult result = Ok("Authentication Successful.");
             result.AddHeaderEntry("Set-Cookie", authenticationCookieContent.ToString());
+
             return result;
         }
 

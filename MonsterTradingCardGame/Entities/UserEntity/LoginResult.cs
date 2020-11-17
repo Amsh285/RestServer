@@ -2,13 +2,15 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace MonsterTradingCardGame.Entities
+namespace MonsterTradingCardGame.Entities.UserEntity
 {
     public sealed class LoginResult
     {
         public AuthenticationResult AuthenticationResult { get; }
 
-        public Guid AuthenticationToken { get; private set; }
+        public Guid? AuthenticationToken { get; private set; }
+
+        public DateTime? AuthenticationTokenExpirationDate { get; private set; }
 
         public int NumberOfFailedLoginAttempts { get; }
 
@@ -18,9 +20,13 @@ namespace MonsterTradingCardGame.Entities
             NumberOfFailedLoginAttempts = numberOfFailedLoginAttempts;
         }
 
-        public static LoginResult Success(Guid authenticationToken)
+        public static LoginResult Success(Guid authenticationToken, DateTime authenticationTokenExpirationDate)
         {
-            return new LoginResult(AuthenticationResult.Success, 0) { AuthenticationToken = authenticationToken };
+            return new LoginResult(AuthenticationResult.Success, 0)
+            {
+                AuthenticationToken = authenticationToken,
+                AuthenticationTokenExpirationDate = authenticationTokenExpirationDate
+            };
         }
 
         public static LoginResult AlreadyLoggedIn()

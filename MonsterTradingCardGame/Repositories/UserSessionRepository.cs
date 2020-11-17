@@ -39,14 +39,54 @@ namespace MonsterTradingCardGame.Repositories
             }
         }
 
+        public void Delete(int userSessionID, NpgsqlTransaction transaction = null)
+        {
+            DeleteWhere($"\"UserSession_ID\" = @userSessionID", transaction, new NpgsqlParameter("userSessionID", userSessionID));
+        }
+
+        public void DeleteByUserID(int userID, NpgsqlTransaction transaction = null)
+        {
+            DeleteWhere($"\"User_ID\" = @userID", transaction, new NpgsqlParameter("userID", userID));
+        }
+
+        public void Delete(Guid token, NpgsqlTransaction transaction = null)
+        {
+            DeleteWhere($"\"Token\" = @token", transaction, new NpgsqlParameter("token", token));
+        }
+
+        private void DeleteWhere(string wherecondition, NpgsqlTransaction transaction, params NpgsqlParameter[] parameters)
+        {
+            const string statement = "DELETE FROM public.\"UserSession\"";
+            StringBuilder sql = new StringBuilder();
+            sql.AppendLine(statement);
+
+            if (wherecondition != null)
+                sql.Append("WHERE ").Append(wherecondition);
+
+            if (transaction != null)
+                database.ExecuteNonQuery(sql.ToString(), transaction, parameters);
+            else
+            {
+                using (NpgsqlConnection connection = database.CreateAndOpenConnection())
+                using (transaction = connection.BeginTransaction())
+                    database.ExecuteNonQuery(sql.ToString(), transaction, parameters);
+            }
+        }
+
         public UserSession GetLatestUserSession(int userID, NpgsqlTransaction transaction = null)
         {
-            return GetUserSessionsWhere($"\"User_ID\" = @userID", transaction, new NpgsqlParameter("userID", userID))
+            return GetUserSessionsWhere("\"User_ID\" = @userID", transaction, new NpgsqlParameter("userID", userID))
                 .OrderByDescending(u => u.CreationDate)
                 .FirstOrDefault();
         }
 
-        public IEnumerable<UserSession> GetUserSessionsWhere(string whereCondition, NpgsqlTransaction transaction, params NpgsqlParameter[] parameters)
+        public UserSession GetUserSessionByToken(Guid token, NpgsqlTransaction transaction = null)
+        {
+            return GetUserSessionsWhere("\"Token\" = @token", transaction, new NpgsqlParameter("token", token))
+                .FirstOrDefault();
+        }
+
+        private IEnumerable<UserSession> GetUserSessionsWhere(string whereCondition, NpgsqlTransaction transaction, params NpgsqlParameter[] parameters)
         {
             const string statement = "SELECT * FROM public.\"UserSession\"";
             StringBuilder sql = new StringBuilder();
