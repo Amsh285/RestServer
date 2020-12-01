@@ -4,6 +4,7 @@
     {
         Success,
         AlreadyLoggedIn,
+        LockedOut,
         Failed
     }
 }

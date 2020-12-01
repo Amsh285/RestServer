@@ -33,10 +33,17 @@ namespace RestServer.WebServer.CommunicationObjects
         {
             RequestParameters parameters = new RequestParameters(headerEntries, queryString);
 
-            int contentLength;
-            int.TryParse(headerEntries["Content-Length"].First(), out contentLength);
+            int contentLength = 0;
 
-            RequestContent content = new RequestContent(headerEntries["Content-Type"].First(), contentLength, inputStream);
+            if (headerEntries.ContainsKey("Content-Length"))
+                int.TryParse(headerEntries["Content-Length"].FirstOrDefault(), out contentLength);
+
+            string contentType = null;
+
+            if (headerEntries.ContainsKey("Content-Type"))
+                contentType = headerEntries["Content-Type"].FirstOrDefault();
+
+            RequestContent content = new RequestContent(contentType, contentLength, inputStream);
 
             return new RequestContext(request, parameters, content, CookieCollection.Build(headerEntries));
         }

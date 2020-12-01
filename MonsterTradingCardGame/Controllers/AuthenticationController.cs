@@ -49,17 +49,33 @@ namespace MonsterTradingCardGame.Controllers
 
         private IActionResult AuthenticationSuccess(Guid authenticationToken, DateTime authenticationTokenExpirationDate)
         {
-            string epirationDate = $"{DateTime.Now.AddMinutes(2).ToString("ddd, dd MMM yyy HH:mm:ss", new CultureInfo("En-en"))} GMT";
+            IActionResult result = Ok("Authentication Successful.");
+            AddAuthenticationCookie(result, authenticationToken, authenticationTokenExpirationDate);
+            //AddTestCookie(result, DateTime.Now.AddDays(1));
+
+            return result;
+        }
+
+        private static void AddAuthenticationCookie(IActionResult result, Guid authenticationToken, DateTime authenticationTokenExpirationDate)
+        {
+            string epirationDate = $"{authenticationTokenExpirationDate.ToString("ddd, dd MMM yyy HH:mm:ss", new CultureInfo("En-en"))} GMT";
 
             StringBuilder authenticationCookieContent = new StringBuilder();
             authenticationCookieContent.Append($"{AuthenticationTokenKey}={authenticationToken};");
             //authenticationCookieContent.Append($"Domain=http://DoriansBadgerDen.at;");
-            authenticationCookieContent.Append($"expires={authenticationTokenExpirationDate}");
-
-            IActionResult result = Ok("Authentication Successful.");
+            authenticationCookieContent.Append($"expires={epirationDate}");
             result.AddHeaderEntry("Set-Cookie", authenticationCookieContent.ToString());
+        }
 
-            return result;
+        private static void AddTestCookie(IActionResult result, DateTime expirationDate)
+        {
+            string epirationDateString = $"{expirationDate.ToString("ddd, dd MMM yyy HH:mm:ss", new CultureInfo("En-en"))} GMT";
+
+            StringBuilder cookieContent = new StringBuilder();
+            cookieContent.Append($"Foo=Bar;");
+            //authenticationCookieContent.Append($"Domain=http://DoriansBadgerDen.at;");
+            cookieContent.Append($"expires={epirationDateString}");
+            result.AddHeaderEntry("Set-Cookie", cookieContent.ToString());
         }
 
         private const string AuthenticationTokenKey = "AuthToken";
