@@ -16,6 +16,11 @@ namespace RestServer.WebServer.CommunicationObjects
             this.cookieContainer = cookieContainer;
         }
 
+        public bool Exists(string name)
+        {
+            return cookieContainer.ContainsKey(name);
+        }
+
         public string this[string name]
         {
             get

@@ -7,6 +7,7 @@ namespace MonsterTradingCardGame.Entities.UserEntity
     public enum LogoutResult
     {
         Success,
+        InvalidAuthenticationTokenFormat,
         NotLoggedIn
     }
 }

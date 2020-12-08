@@ -1,4 +1,5 @@
 ﻿using MonsterTradingCardGame.Entities.UserEntity;
+using MonsterTradingCardGame.Infrastructure;
 using RestServer.WebServer.CommunicationObjects;
 using RestServer.WebServer.EndpointHandling;
 using RestServer.WebServer.EndpointHandling.Attributes;
@@ -21,6 +22,7 @@ namespace MonsterTradingCardGame.Controllers
         [HttpPost]
         public IActionResult Login(string username, string password)
         {
+            // Todo: neu einloggen wenn kein cookie gesendet wird aber in der datenbank ein nicht abgelaufenes existiert.
             LoginResult result = userEntity.Login(username, Encoding.UTF8.GetBytes(password));
             Assert.NotNull(result, nameof(result));
 
@@ -42,43 +44,44 @@ namespace MonsterTradingCardGame.Controllers
             LogoutResult result = userEntity.Logout(requestContext);
 
             if (result == LogoutResult.NotLoggedIn)
-                return Ok("Logout failed not logged in.");
+                return Unauthorized("Logout failed not logged in.");
+            else if (result == LogoutResult.InvalidAuthenticationTokenFormat)
+                return BadRequest("Logout failed, invalid Authenticationtoken- Format.");
 
-            return Ok("Logout Successful.");
+            IActionResult actionResult = Ok("Logout Successful.");
+            SetCookie(actionResult, ProjectConstants.AuthenticationTokenKey, string.Empty, null, DateTime.Now);
+            return actionResult;
         }
 
         private IActionResult AuthenticationSuccess(Guid authenticationToken, DateTime authenticationTokenExpirationDate)
         {
             IActionResult result = Ok("Authentication Successful.");
             AddAuthenticationCookie(result, authenticationToken, authenticationTokenExpirationDate);
-            //AddTestCookie(result, DateTime.Now.AddDays(1));
 
             return result;
         }
 
         private static void AddAuthenticationCookie(IActionResult result, Guid authenticationToken, DateTime authenticationTokenExpirationDate)
         {
-            string epirationDate = $"{authenticationTokenExpirationDate.ToString("ddd, dd MMM yyy HH:mm:ss", new CultureInfo("En-en"))} GMT";
-
-            StringBuilder authenticationCookieContent = new StringBuilder();
-            authenticationCookieContent.Append($"{AuthenticationTokenKey}={authenticationToken};");
-            //authenticationCookieContent.Append($"Domain=http://DoriansBadgerDen.at;");
-            authenticationCookieContent.Append($"expires={epirationDate}");
-            result.AddHeaderEntry("Set-Cookie", authenticationCookieContent.ToString());
+            SetCookie(result, ProjectConstants.AuthenticationTokenKey, authenticationToken.ToString(), null, authenticationTokenExpirationDate);
         }
 
-        private static void AddTestCookie(IActionResult result, DateTime expirationDate)
+        private static void SetCookie(IActionResult result, string token, string value, string path, DateTime expirationDate)
         {
-            string epirationDateString = $"{expirationDate.ToString("ddd, dd MMM yyy HH:mm:ss", new CultureInfo("En-en"))} GMT";
+            string formattedExpirationDate = $"{expirationDate.ToString("ddd, dd MMM yyy HH:mm:ss", new CultureInfo("En-en"))} GMT";
 
             StringBuilder cookieContent = new StringBuilder();
-            cookieContent.Append($"Foo=Bar;");
-            //authenticationCookieContent.Append($"Domain=http://DoriansBadgerDen.at;");
-            cookieContent.Append($"expires={epirationDateString}");
+            cookieContent.Append($"{token}={value}; ");
+
+            if(string.IsNullOrWhiteSpace(path))
+                cookieContent.Append("Path=/; ");
+            else
+                cookieContent.Append($"Path={path}; ");
+
+            cookieContent.Append($"Expires={formattedExpirationDate}");
             result.AddHeaderEntry("Set-Cookie", cookieContent.ToString());
         }
 
-        private const string AuthenticationTokenKey = "AuthToken";
         private readonly RequestContext requestContext;
         private static readonly UserEntity userEntity = new UserEntity();
     }

@@ -29,14 +29,22 @@ namespace MonsterTradingCardGame.Repositories
                 new NpgsqlParameter("expirationDate", expirationDate)
             };
 
-            if (transaction != null)
-                database.ExecuteNonQuery(statement, transaction, parameters);
-            else
+            database.ExecuteNonQuery(statement, transaction, parameters);
+        }
+
+        public void CancelSession(UserSession session, NpgsqlTransaction transaction = null)
+        {
+            const string statement = @"UPDATE public.""UserSession""
+                SET ""ExpirationDate"" = @expirationDate
+                WHERE ""UserSession_ID"" = @userSessionID";
+
+            NpgsqlParameter[] parameters = new NpgsqlParameter[]
             {
-                using (NpgsqlConnection connection = database.CreateAndOpenConnection())
-                using (transaction = connection.BeginTransaction())
-                    database.ExecuteNonQuery(statement, transaction, parameters);
-            }
+                new NpgsqlParameter("expirationDate", DateTime.Now),
+                new NpgsqlParameter("userSessionID", session.UserSessionID)
+            };
+
+            database.ExecuteNonQuery(statement, transaction, parameters);
         }
 
         public void Delete(int userSessionID, NpgsqlTransaction transaction = null)
@@ -63,14 +71,7 @@ namespace MonsterTradingCardGame.Repositories
             if (wherecondition != null)
                 sql.Append("WHERE ").Append(wherecondition);
 
-            if (transaction != null)
-                database.ExecuteNonQuery(sql.ToString(), transaction, parameters);
-            else
-            {
-                using (NpgsqlConnection connection = database.CreateAndOpenConnection())
-                using (transaction = connection.BeginTransaction())
-                    database.ExecuteNonQuery(sql.ToString(), transaction, parameters);
-            }
+            database.ExecuteNonQuery(sql.ToString(), transaction, parameters);
         }
 
         public UserSession GetLatestUserSession(int userID, NpgsqlTransaction transaction = null)
@@ -95,14 +96,7 @@ namespace MonsterTradingCardGame.Repositories
             if (whereCondition != null)
                 sql.Append("WHERE ").Append(whereCondition);
 
-            if (transaction != null)
-                return database.Execute(sql.ToString(), transaction, ReadUserSessionRow, parameters);
-            else
-            {
-                using (NpgsqlConnection connection = database.CreateAndOpenConnection())
-                using (transaction = connection.BeginTransaction())
-                    return database.Execute(sql.ToString(), transaction, ReadUserSessionRow, parameters);
-            }
+            return database.Execute(sql.ToString(), transaction, ReadUserSessionRow, parameters);
         }
 
         private static UserSession ReadUserSessionRow(NpgsqlDataReader row)

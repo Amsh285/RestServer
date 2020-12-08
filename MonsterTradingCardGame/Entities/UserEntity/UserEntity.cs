@@ -58,24 +58,34 @@ namespace MonsterTradingCardGame.Entities.UserEntity
         {
             Assert.NotNull(context, nameof(context));
 
-            using (NpgsqlConnection connection = database.CreateAndOpenConnection())
-            using (NpgsqlTransaction transaction = connection.BeginTransaction())
+            if (!context.Cookies.Exists(ProjectConstants.AuthenticationTokenKey) ||
+                string.IsNullOrWhiteSpace(context.Cookies[ProjectConstants.AuthenticationTokenKey]))
+                return LogoutResult.NotLoggedIn;
+
+            if (Guid.TryParse(context.Cookies[ProjectConstants.AuthenticationTokenKey], out Guid sessionToken))
             {
-                try
+                using (NpgsqlConnection connection = database.CreateAndOpenConnection())
+                using (NpgsqlTransaction transaction = connection.BeginTransaction())
                 {
-                    //UserSession session = userSessionRepository.GetUserSessionByToken(, transaction);
+                    try
+                    {
+                        UserSession session = userSessionRepository.GetUserSessionByToken(sessionToken, transaction);
 
-                    //if (session == null)
-                    //    return LogoutResult.NotLoggedIn;
+                        if (session == null || session.IsExpired)
+                            return LogoutResult.NotLoggedIn;
 
-
-                }
-                catch (Exception)
-                {
-                    transaction.Rollback();
-                    throw;
+                        userSessionRepository.CancelSession(session, transaction);
+                        transaction.Commit();
+                    }
+                    catch (Exception)
+                    {
+                        transaction.Rollback();
+                        throw;
+                    }
                 }
             }
+            else
+                return LogoutResult.InvalidAuthenticationTokenFormat;
 
             return LogoutResult.Success;
         }
