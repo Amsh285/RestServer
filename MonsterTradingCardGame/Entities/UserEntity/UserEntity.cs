@@ -17,31 +17,41 @@ namespace MonsterTradingCardGame.Entities.UserEntity
         {
             Assert.NotNull(user, nameof(user));
 
-            UserSession latestUserSession = userSessionRepository.GetLatestUserSession(user.UserID);
+            UserSession latestUserSession = userSessionRepository.GetLatestUserSession(user.UserID, transaction);
             return latestUserSession != null && !latestUserSession.IsExpired;
         }
 
-        public LoginResult Login(string userName, byte[] password)
+        public LoginResult Login(string userName, byte[] password, RequestContext context)
         {
             using (NpgsqlConnection connection = database.CreateAndOpenConnection())
             using (NpgsqlTransaction transaction = connection.BeginTransaction())
             {
                 try
                 {
+                    UserSession session = GetSessionFromCookie(context, transaction);
+
+                    if (session != null && !session.IsExpired)
+                        return LoginResult.AlreadyLoggedIn();
+
                     AuthenticationResult result = Authenticate(userName, password, transaction);
 
-                    //Todo: Handle numberOfFailedLoginAttempts
                     if (result == AuthenticationResult.Failed)
                         return LoginResult.LoginFailed(numberOfFailedLoginAttempts: 0);
-                    else if (result == AuthenticationResult.AlreadyLoggedIn)
-                        return LoginResult.AlreadyLoggedIn();
                     else
                     {
+                        User match = userRepository.GetUser(userName, transaction);
+                        UserSession latestUserSession = userSessionRepository.GetLatestUserSession(match.UserID, transaction);
+
                         Guid authenticationToken = Guid.NewGuid();
                         DateTime authenticationTokenExpirationDate = DateTime.Now.AddDays(1);
 
-                        StoreAuthenticationSessionToken(authenticationToken, authenticationTokenExpirationDate, userName, transaction);
-                        transaction.Commit();
+                        if(latestUserSession != null && !latestUserSession.IsExpired)
+                        {
+                            authenticationToken = latestUserSession.Token;
+                            authenticationTokenExpirationDate = latestUserSession.ExpirationDate;
+                        }
+                        else
+                            StoreAuthenticationSessionToken(authenticationToken, authenticationTokenExpirationDate, userName, transaction);
 
                         return LoginResult.Success(authenticationToken, authenticationTokenExpirationDate);
                     }
@@ -50,6 +60,10 @@ namespace MonsterTradingCardGame.Entities.UserEntity
                 {
                     transaction.Rollback();
                     throw;
+                }
+                finally
+                {
+                    transaction.Commit();
                 }
             }
         }
@@ -90,6 +104,19 @@ namespace MonsterTradingCardGame.Entities.UserEntity
             return LogoutResult.Success;
         }
 
+        public UserSession GetSessionFromCookie(RequestContext context, NpgsqlTransaction transaction = null)
+        {
+            if (!context.Cookies.Exists(ProjectConstants.AuthenticationTokenKey))
+                return null;
+
+            string authenticationToken = context.Cookies[ProjectConstants.AuthenticationTokenKey];
+
+            if (Guid.TryParse(authenticationToken, out Guid token))
+                return userSessionRepository.GetUserSessionByToken(token, transaction);
+
+            return null;
+        }
+
         public AuthenticationResult Authenticate(string userName, byte[] password, NpgsqlTransaction transaction)
         {
             Assert.NotNull(userName, nameof(userName));
@@ -99,9 +126,6 @@ namespace MonsterTradingCardGame.Entities.UserEntity
 
             if (match == null)
                 return AuthenticationResult.Failed;
-
-            if (IsLoggedIn(match))
-                return AuthenticationResult.AlreadyLoggedIn;
 
             byte[] compareHash = SHA256PasswordService.GenerateHash(password, match.Salt);
 

@@ -22,8 +22,7 @@ namespace MonsterTradingCardGame.Controllers
         [HttpPost]
         public IActionResult Login(string username, string password)
         {
-            // Todo: neu einloggen wenn kein cookie gesendet wird aber in der datenbank ein nicht abgelaufenes existiert.
-            LoginResult result = userEntity.Login(username, Encoding.UTF8.GetBytes(password));
+            LoginResult result = userEntity.Login(username, Encoding.UTF8.GetBytes(password), requestContext);
             Assert.NotNull(result, nameof(result));
 
             if (result.AuthenticationResult == AuthenticationResult.Failed)
@@ -49,7 +48,7 @@ namespace MonsterTradingCardGame.Controllers
                 return BadRequest("Logout failed, invalid Authenticationtoken- Format.");
 
             IActionResult actionResult = Ok("Logout Successful.");
-            SetCookie(actionResult, ProjectConstants.AuthenticationTokenKey, string.Empty, null, DateTime.Now);
+            SetCookie(actionResult, ProjectConstants.AuthenticationTokenKey, string.Empty, null, DateTime.Now.AddMonths(-1));
             return actionResult;
         }
 
