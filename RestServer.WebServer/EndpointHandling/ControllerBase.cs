@@ -21,6 +21,11 @@ namespace RestServer.WebServer.EndpointHandling
             return HttpStatusCodeResult.BadRequest(client, errorMessage);
         }
 
+        protected IActionResult Unauthorized(string errorMessage = null)
+        {
+            return HttpStatusCodeResult.Unauthorized(client, errorMessage);
+        }
+
         protected IActionResult NotFound(string errorMessage = null)
         {
             return HttpStatusCodeResult.NotFound(client, errorMessage);

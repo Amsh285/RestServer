@@ -1,4 +1,5 @@
 ﻿using RestServer.WebServer.Communication;
+using RestServer.WebServer.Infrastructure;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -44,7 +45,7 @@ namespace RestServer.WebServer.CommunicationObjects.CommunicationObjectBuilders
 
             RequestContext.RequestLine requestLine = new RequestContext.RequestLine(version, path, requestedPath, ConvertMethod(method));
             IReadOnlyDictionary<string, string> parsedQueryString = ParseQueryString(queryString);
-            IReadOnlyDictionary<string, string> parsedRequestHeaderFields = ParseRequestHeaderFields(requestHeaderFields);
+            Multimap<string, string> parsedRequestHeaderFields = ParseRequestHeaderFields(requestHeaderFields);
 
             return RequestContext.Build(requestLine, parsedQueryString, parsedRequestHeaderFields, requestStream);
         }
@@ -71,20 +72,26 @@ namespace RestServer.WebServer.CommunicationObjects.CommunicationObjectBuilders
             return result;
         }
 
-        private static IReadOnlyDictionary<string, string> ParseRequestHeaderFields(string[] requestHeaderFields)
+        private static Multimap<string, string> ParseRequestHeaderFields(string[] requestHeaderFields)
         {
-            KeyValuePair<string, string> exctractHeaderField(string value)
+            KeyValuePair<string, List<string>> exctractHeaderField(string value)
             {
                 string[] fieldValues = value.Split(':');
-                return new KeyValuePair<string, string>(fieldValues[0].Trim(), fieldValues[1].Trim());
+                string[] values = fieldValues[1].Split(";");
+
+                return new KeyValuePair<string, List<string>>(fieldValues[0], values.ToList());
             };
 
             IEnumerable<KeyValuePair<string, string>> fields = requestHeaderFields
                 .Skip(1)
                 .Where(s => !string.IsNullOrWhiteSpace(s) && s.Contains(':') && !s.Split(':').Any(s => string.IsNullOrWhiteSpace(s)))
-                .Select(exctractHeaderField);
+                .Select(exctractHeaderField)
+                .SelectMany(f => f.Value, (keyValuePair, value) => new KeyValuePair<string, string>(keyValuePair.Key.Trim(), value.Trim()));
 
-            return new Dictionary<string, string>(fields);
+            Multimap<string, string> headerEntries = new Multimap<string, string>();
+            headerEntries.AddRange(fields);
+
+            return headerEntries;
         }
 
         private static HttpVerb ConvertMethod(string method)

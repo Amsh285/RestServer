@@ -19,8 +19,6 @@ namespace MasterTradingCardGame.Controllers
             try
             {
                 userRepository.Register(user);
-                Task.Run(() => user.Clear());
-
                 return Created();
             }
             catch (UniqueConstraintViolationException ucvEx)

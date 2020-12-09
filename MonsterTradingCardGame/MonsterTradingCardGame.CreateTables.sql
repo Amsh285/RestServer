@@ -84,6 +84,7 @@ CREATE TABLE "BoosterPack_Cards" (
 
 CREATE TABLE "UserSession" (
   "UserSession_ID" SERIAL PRIMARY KEY,
+  "User_ID" int NOT NULL,
   "Token" uuid NOT NULL,
   "CreationDate" timestamp NOT NULL,
   "ExpirationDate" timestamp NOT NULL
@@ -145,7 +146,7 @@ ALTER TABLE "BoosterPack_Cards" ADD FOREIGN KEY ("BoosterPack_ID") REFERENCES "B
 
 ALTER TABLE "BoosterPack_Cards" ADD FOREIGN KEY ("Card_ID") REFERENCES "Card" ("Card_ID");
 
-ALTER TABLE "UserSession" ADD FOREIGN KEY ("UserSession_ID") REFERENCES "User" ("User_ID");
+ALTER TABLE "UserSession" ADD FOREIGN KEY ("User_ID") REFERENCES "User" ("User_ID");
 
 ALTER TABLE "Game" ADD FOREIGN KEY ("UserOnTurn_Game_User_ID") REFERENCES "Game_User" ("Game_User_ID");
 

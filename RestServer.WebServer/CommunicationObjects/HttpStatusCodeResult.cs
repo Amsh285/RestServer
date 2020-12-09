@@ -34,6 +34,11 @@ namespace RestServer.WebServer.CommunicationObjects
             return StatusMessage(HttpStatusCode.BadRequest, client, errorMessage);
         }
 
+        public static HttpStatusCodeResult Unauthorized(TcpClient client, string errorMessage = null)
+        {
+            return StatusMessage(HttpStatusCode.Unauthorized, client, errorMessage);
+        }
+
         public static HttpStatusCodeResult NotFound(TcpClient client, string errorMessage = null)
         {
             return StatusMessage(HttpStatusCode.NotFound, client, errorMessage);

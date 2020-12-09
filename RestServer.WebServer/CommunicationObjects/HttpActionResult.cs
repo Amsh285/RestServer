@@ -12,6 +12,11 @@ namespace RestServer.WebServer.CommunicationObjects
             this.responseHeader = responseHeader ?? throw new ArgumentNullException($"{nameof(responseHeader)} cannot be null.");
         }
 
+        public void AddHeaderEntry(string key, string value)
+        {
+            this.responseHeader.Add(key, value);
+        }
+
         public virtual void Execute()
         {
             NetworkStream responseStream = currentClient.GetStream();

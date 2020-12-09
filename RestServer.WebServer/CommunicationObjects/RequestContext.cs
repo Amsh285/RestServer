@@ -1,112 +1,51 @@
-﻿using System;
+﻿using RestServer.WebServer.Infrastructure;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Sockets;
 
 namespace RestServer.WebServer.CommunicationObjects
 {
-    public class RequestContext
+    public partial class RequestContext
     {
         public RequestLine Request { get; private set; }
-
-        public IReadOnlyDictionary<string, string> RequestHeaderFields { get; private set; }
 
         public RequestParameters Parameters { get; private set; }
 
         public RequestContent Content { get; private set; }
 
-        private RequestContext(RequestLine request, IReadOnlyDictionary<string, string> requestHeaderFields, RequestParameters parameters, RequestContent content)
+        public CookieCollection Cookies { get; }
+
+        private RequestContext(RequestLine request, RequestParameters parameters, RequestContent content, CookieCollection cookies)
         {
-            if (request == null)
-                throw new ArgumentNullException($"{nameof(request)} cannot be null.");
-
-            if (requestHeaderFields == null)
-                throw new ArgumentNullException($"{nameof(requestHeaderFields)} cannot be null.");
-
-            if (parameters == null)
-                throw new ArgumentNullException($"{nameof(parameters)} cannot be null.");
-
-            if (content == null)
-                throw new ArgumentNullException($"{nameof(content)} cannot be null.");
+            Assert.NotNull(request, nameof(request));
+            Assert.NotNull(parameters, nameof(parameters));
+            Assert.NotNull(content, nameof(content));
+            Assert.NotNull(cookies, nameof(cookies));
 
             Request = request;
-            RequestHeaderFields = requestHeaderFields;
             Parameters = parameters;
             Content = content;
+            Cookies = cookies;
         }
 
-        public static RequestContext Build(RequestLine request, IReadOnlyDictionary<string, string> queryString, IReadOnlyDictionary<string, string> headers, NetworkStream inputStream)
+        public static RequestContext Build(RequestLine request, IReadOnlyDictionary<string, string> queryString, Multimap<string, string> headerEntries, NetworkStream inputStream)
         {
-            if (request == null)
-                throw new ArgumentNullException($"{nameof(request)} cannot be null.");
+            RequestParameters parameters = new RequestParameters(headerEntries, queryString);
 
-            if (queryString == null)
-                throw new ArgumentNullException($"{nameof(queryString)} cannot be null.");
+            int contentLength = 0;
 
-            if (headers == null)
-                throw new ArgumentNullException($"{nameof(headers)} cannot be null.");
+            if (headerEntries.ContainsKey("Content-Length"))
+                int.TryParse(headerEntries["Content-Length"].FirstOrDefault(), out contentLength);
 
-            if (inputStream == null)
-                throw new ArgumentNullException($"{nameof(inputStream)} cannot be null.");
+            string contentType = null;
 
-            RequestParameters parameters = new RequestParameters(headers, queryString);
+            if (headerEntries.ContainsKey("Content-Type"))
+                contentType = headerEntries["Content-Type"].FirstOrDefault();
 
-            int contentLength;
-            int.TryParse(headers.GetValueOrDefault("Content-Length"), out contentLength);
+            RequestContent content = new RequestContent(contentType, contentLength, inputStream);
 
-            RequestContent content = new RequestContent(headers.GetValueOrDefault("Content-Type"), contentLength, inputStream);
-
-            return new RequestContext(request, headers, parameters, content);
-        }
-
-        public sealed class RequestLine
-        {
-            public string HttpVersion { get; private set; }
-
-            public string Path { get; private set; }
-
-            public string FullPath { get; }
-
-            public HttpVerb Method { get; private set; }
-
-            public RequestLine(string httpVersion, string path, string fullPath, HttpVerb method)
-            {
-                HttpVersion = httpVersion;
-                Path = path;
-                FullPath = fullPath;
-                Method = method;
-            }
-        }
-
-        public sealed class RequestParameters
-        {
-            public IReadOnlyDictionary<string, string> QueryStringValues { get; private set; }
-
-            public IReadOnlyDictionary<string, string> Headers { get; private set; }
-
-            public RequestParameters(IReadOnlyDictionary<string, string> headers, IReadOnlyDictionary<string, string> queryStringValues)
-            {
-                Headers = headers;
-                QueryStringValues = queryStringValues;
-            }
-        }
-
-        public sealed class RequestContent
-        {
-            public string ContentType { get; private set; }
-
-            public int ContentLength { get; private set; }
-
-            public NetworkStream InputStream { get; private set; }
-
-            public RequestContent(string contentType, int contentLength, NetworkStream inputStream)
-            {
-                if (inputStream == null)
-                    throw new ArgumentNullException($"{nameof(inputStream)} cannot be null.");
-
-                ContentType = contentType;
-                ContentLength = contentLength;
-                InputStream = inputStream;
-            }
+            return new RequestContext(request, parameters, content, CookieCollection.Build(headerEntries));
         }
     }
 }
