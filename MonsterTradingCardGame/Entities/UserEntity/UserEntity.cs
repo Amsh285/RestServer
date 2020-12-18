@@ -158,8 +158,8 @@ namespace MonsterTradingCardGame.Entities.UserEntity
             userSessionRepository.InsertNew(match.UserID, token, expirationDate, transaction);
         }
 
-        private static readonly UserRepository userRepository = new UserRepository();
-        private static readonly UserSessionRepository userSessionRepository = new UserSessionRepository();
+        private readonly UserRepository userRepository = new UserRepository();
+        private readonly UserSessionRepository userSessionRepository = new UserSessionRepository(database);
 
         private static readonly PostgreSqlDatabase database =
             new PostgreSqlDatabase("Host=localhost;Port=5433;Username=postgres;Password=Badger123!;Database=MonsterTradingCardGame");

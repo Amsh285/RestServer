@@ -12,6 +12,13 @@ namespace MonsterTradingCardGame.Repositories
 {
     public sealed class UserSessionRepository
     {
+        public UserSessionRepository(PostgreSqlDatabase database)
+        {
+            Assert.NotNull(database, nameof(database));
+
+            this.database = database;
+        }
+
         public void InsertNew(int userID, Guid Token, DateTime expirationDate, NpgsqlTransaction transaction = null)
         {
             DateTime creationDate = DateTime.Now;
@@ -113,6 +120,6 @@ namespace MonsterTradingCardGame.Repositories
             };
         }
 
-        private static readonly PostgreSqlDatabase database = new PostgreSqlDatabase("Host=localhost;Port=5433;Username=postgres;Password=Badger123!;Database=MonsterTradingCardGame");
+        private readonly PostgreSqlDatabase database;
     }
 }
