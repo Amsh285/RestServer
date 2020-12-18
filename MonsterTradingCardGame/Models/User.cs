@@ -23,5 +23,11 @@ namespace MasterTradingCardGame.Models
         public string HashAlgorithm { get; set; }
 
         public int Coins { get; set; }
+
+        public int Rating { get; set; }
+
+        public int GamesPlayed { get; set; }
+
+        public int Winrate { get; set; }
     }
 }

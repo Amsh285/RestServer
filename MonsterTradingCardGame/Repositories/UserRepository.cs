@@ -34,8 +34,8 @@ namespace MasterTradingCardGame.Repositories
                 if (!UserNameExists(newUser, transaction))
                 {
                     string insertUserStatement = @"INSERT INTO public.""User""(""FirstName"", ""LastName"", ""UserName"", ""Email"", ""Password"",
-                                ""Salt"", ""HashAlgorithm"", ""Coins"")
-	                            VALUES(@firstName, @lastName, @userName, @email, @password, @salt, @hashAlgorithm, @coins); ";
+                                ""Salt"", ""HashAlgorithm"", ""Coins"", ""Rating"", ""GamesPlayed"", ""Winrate"")
+	                            VALUES(@firstName, @lastName, @userName, @email, @password, @salt, @hashAlgorithm, @coins, @rating, @gamesplayed, @winrate); ";
 
                     database.ExecuteNonQuery(insertUserStatement, transaction,
                         new NpgsqlParameter("firstName", newUser.FirstName),
@@ -45,7 +45,10 @@ namespace MasterTradingCardGame.Repositories
                         new NpgsqlParameter("password", passwordHash),
                         new NpgsqlParameter("salt", salt),
                         new NpgsqlParameter("hashAlgorithm", "SHA256"),
-                        new NpgsqlParameter("coins", 20)
+                        new NpgsqlParameter("coins", 20),
+                        new NpgsqlParameter("rating", 1500),
+                        new NpgsqlParameter("gamesplayed", (object)0),
+                        new NpgsqlParameter("winrate", (object)0)
                     );
 
                     transaction.Commit();
@@ -110,7 +113,10 @@ namespace MasterTradingCardGame.Repositories
                 Password = row.GetValue<byte[]>("Password"),
                 Salt = row.GetValue<byte[]>("Salt"),
                 HashAlgorithm = row.GetValue<string>("HashAlgorithm"),
-                Coins = row.GetValue<int>("Coins")
+                Coins = row.GetValue<int>("Coins"),
+                Rating = row.GetValue<int>("Rating"),
+                GamesPlayed = row.GetValue<int>("GamesPlayed"),
+                Winrate = row.GetValue<int>("Winrate")
             };
         }
 
