@@ -116,7 +116,8 @@ namespace RestServer.WebServer
                 string parseErrorMessage = $"Ungültiger Request, parsen nicht möglich: {parserEx.Message}";
 
                 Console.WriteLine(parseErrorMessage);
-                IActionResult parseError = HttpStatusCodeResult.BadRequest(client, parseErrorMessage);
+                HttpStatusCodeResult.BadRequest(client, parseErrorMessage)
+                    .Execute();
             }
             catch (Exception ex) when (ex is EndPointHandlerException || ex is EndpointHandlerRegisterException)
             {

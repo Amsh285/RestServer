@@ -3,6 +3,7 @@ using RestServer.WebServer.CommunicationObjects.CommunicationObjectBuilders;
 using System;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace RestServer.WebServer.Communication
 {
@@ -17,6 +18,12 @@ namespace RestServer.WebServer.Communication
 
             int currentByte;
             bool lastCharNewLine = false;
+
+            byte[] buffer = new byte[1];
+            int bytesRead = requestStream.Read(buffer, 0, buffer.Length);
+
+            if (bytesRead > 0)
+                requestHeaderTextBuilder.Append(Encoding.UTF8.GetString(buffer));
 
             while (requestStream.DataAvailable)
             {
