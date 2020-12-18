@@ -5,7 +5,6 @@ using RestServer.WebServer.CommunicationObjects;
 using RestServer.WebServer.EndpointHandling;
 using RestServer.WebServer.EndpointHandling.Attributes;
 using RestServer.WebServer.Infrastructure;
-using System.Threading.Tasks;
 
 namespace MasterTradingCardGame.Controllers
 {
