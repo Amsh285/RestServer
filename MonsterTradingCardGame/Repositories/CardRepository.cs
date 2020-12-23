@@ -28,6 +28,12 @@ namespace MonsterTradingCardGame.Repositories
             );
         }
 
+        public int GetCardCount(NpgsqlTransaction transaction = null)
+        {
+            const string statement = "SELECT COUNT(*) FROM public.\"Card\"";
+            return database.ExecuteScalar<int>(statement, transaction);
+        }
+
         public void InsertCard(Card card, NpgsqlTransaction transaction = null)
         {
             Assert.NotNull(card, nameof(card));

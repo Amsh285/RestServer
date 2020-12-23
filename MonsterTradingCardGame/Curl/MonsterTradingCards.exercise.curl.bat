@@ -106,3 +106,6 @@ echo.
 
 curl -X POST http://127.0.0.1:13001/Card --header "Content-Type: Json" -d "{\"Element\":\"Water\", \"Type\":\"Monster\", \"Name\":\"Eiskönigin\", \"Description\":\"Die Königstochter Anna begibt sich auf die Suche nach ihrer älteren Schwester Elsa, der Eiskönigin. Anna wird auf ihrer abenteuerlichen Reise von dem Bergsteigspezialisten und Naturburschen Kristoff sowie dem Rentier Sven unterstützt. Gemeinsam wollen sie Elsa finden, die dafür verantwortlich ist, dass das Königreich Arendelle nun im ewigen Eis gefangen ist. Die drei Abenteurer müssen sich auf ihrer Reise gegen die Elemente behaupten.\", \"AttackPoints\":55}"
 echo.
+
+curl -X POST http://127.0.0.1:13001/Card --header "Content-Type: Json" -d "{\"Element\":\"Water\", \"Type\":\"Spell\", \"Name\":\"Poseidons Kiss\", \"Description\":\"Everyone fears it...\", \"AttackPoints\":100}"
+echo.
