@@ -115,4 +115,9 @@ REM --------------------------------------------------
 echo 3.3 Buy Boosters
 
 curl -X POST http://127.0.0.1:13001/Shop/Booster --cookie altenhof.kekse
+curl -X POST http://127.0.0.1:13001/Shop/Booster --cookie altenhof.kekse
+curl -X POST http://127.0.0.1:13001/Shop/Booster --cookie altenhof.kekse
+
+curl -X POST http://127.0.0.1:13001/Shop/Booster --cookie kienboec.kekse
+curl -X POST http://127.0.0.1:13001/Shop/Booster --cookie kienboec.kekse
 
