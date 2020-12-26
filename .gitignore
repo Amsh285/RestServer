@@ -9,3 +9,6 @@
 /MonsterTradingCardGame/obj/*
 /MonsterTradingCardGame.UnitTests/bin/*
 /MonsterTradingCardGame.UnitTests/obj/*
+
+
+/MonsterTradingCardGame/Curl/Response/*
