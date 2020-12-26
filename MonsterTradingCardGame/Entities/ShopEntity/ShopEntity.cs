@@ -36,12 +36,14 @@ namespace MonsterTradingCardGame.Entities.ShopEntity
 
                 Random rnd = new Random((int)DateTime.Now.Ticks);
                 
-                for(int i = 0;i < 4;++i)
+                for(int i = 0;i < 5;++i)
                 {
                     int cardNumber = rnd.Next() % cardCount;
-
-
+                    int cardID = boosterRepository.GetCardIDFromCardNumber(cardNumber, transaction);
+                    boosterRepository.AssignCardToBooser(cardID, boosterID, transaction);
                 }
+
+                transaction.Commit();
             }
         }
 

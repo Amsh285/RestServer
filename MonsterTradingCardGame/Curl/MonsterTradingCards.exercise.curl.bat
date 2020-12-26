@@ -109,3 +109,10 @@ echo.
 
 curl -X POST http://127.0.0.1:13001/Card --header "Content-Type: Json" -d "{\"Element\":\"Water\", \"Type\":\"Spell\", \"Name\":\"Poseidons Kiss\", \"Description\":\"Everyone fears it...\", \"AttackPoints\":100}"
 echo.
+
+
+REM --------------------------------------------------
+echo 3.3 Buy Boosters
+
+curl -X POST http://127.0.0.1:13001/Shop/Booster --cookie altenhof.kekse
+

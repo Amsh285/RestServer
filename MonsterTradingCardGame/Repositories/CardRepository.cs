@@ -31,7 +31,7 @@ namespace MonsterTradingCardGame.Repositories
         public int GetCardCount(NpgsqlTransaction transaction = null)
         {
             const string statement = "SELECT COUNT(*) FROM public.\"Card\"";
-            return database.ExecuteScalar<int>(statement, transaction);
+            return (int)database.ExecuteScalar<long>(statement, transaction);
         }
 
         public void InsertCard(Card card, NpgsqlTransaction transaction = null)
