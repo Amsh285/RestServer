@@ -2,9 +2,11 @@
 using MasterTradingCardGame.Models;
 using MasterTradingCardGame.Repositories;
 using MonsterTradingCardGame.Infrastructure;
+using MonsterTradingCardGame.Infrastructure.Authentication;
 using MonsterTradingCardGame.Models;
 using MonsterTradingCardGame.Repositories;
 using Npgsql;
+using RestServer.WebServer.CommunicationObjects;
 using RestServer.WebServer.Infrastructure;
 using System;
 using System.Collections.Generic;
@@ -14,20 +16,12 @@ namespace MonsterTradingCardGame.Entities.PlayerEntity
 {
     public sealed class PlayerEntity
     {
-        public void OpenFirstBoosterPackage(Guid sessionToken)
+        public void OpenFirstBoosterPackage(RequestContext requestContext)
         {
             using (NpgsqlConnection connection = database.CreateAndOpenConnection())
             using (NpgsqlTransaction transaction = connection.BeginTransaction())
             {
-                //Todo: remove duplicate Code
-                UserSession session = userSessionRepository.GetUserSessionByToken(sessionToken, transaction);
-
-                if (session == null)
-                    throw new NotFoundException($"User Session ID:{sessionToken} could not be found.");
-
-                if (session.IsExpired)
-                    throw new SessionExpiredException($"User Session ID:{sessionToken} is expired.");
-
+                UserSession session = CookieAuthenticationModule.GetUserSessionFromRequest(requestContext, transaction);
                 User user = userRepository.GetUser(session.UserID, transaction);
                 Assert.NotNull(user, nameof(user));
 

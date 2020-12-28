@@ -1,8 +1,10 @@
 ﻿using MonsterTradingCardGame.Entities.PlayerEntity;
 using MonsterTradingCardGame.Infrastructure;
+using MonsterTradingCardGame.Infrastructure.Authentication;
 using RestServer.WebServer.CommunicationObjects;
 using RestServer.WebServer.EndpointHandling;
 using RestServer.WebServer.EndpointHandling.Attributes;
+using RestServer.WebServer.Infrastructure;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -19,17 +21,19 @@ namespace MonsterTradingCardGame.Controllers
         [HttpPost("OpenFirstBoosterPackage")]
         public IActionResult OpenFirstBoosterPackage()
         {
-            //Todo: Remove duplicate.
-            if (!requestContext.Cookies.Exists(ProjectConstants.AuthenticationTokenKey))
-                return Unauthorized();
-
-            if (Guid.TryParse(requestContext.Cookies[ProjectConstants.AuthenticationTokenKey], out Guid sessionToken))
+            try
             {
-                playerEntity.OpenFirstBoosterPackage(sessionToken);
+                playerEntity.OpenFirstBoosterPackage(requestContext);
                 return Ok();
             }
-            else
-                return BadRequest($"Invalid AuthenticationToken- Format.");
+            catch (SessionTokenNotFoundException nfEx)
+            {
+                return Unauthorized(nfEx.Message);
+            }
+            catch (Exception ex) when (ex is InvalidSessionTokenFormatException || ex is SessionExpiredException)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         private static readonly PlayerEntity playerEntity = new PlayerEntity();
