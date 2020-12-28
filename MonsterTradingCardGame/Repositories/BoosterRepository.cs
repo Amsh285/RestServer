@@ -44,10 +44,10 @@ namespace MonsterTradingCardGame.Repositories
             return database.Execute(statement, transaction, ReadBoosterPackCard, new NpgsqlParameter("boosterPackID", boosterPackID));
         }
 
-        public BoosterPack GetFirstBooserpackage(int userID, NpgsqlTransaction transaction = null)
+        public BoosterPack GetFirstBooserPackage(int userID, NpgsqlTransaction transaction = null)
         {
             const string statement = @"SELECT ""BoosterPack_ID"", ""User_ID"", ""CardCount""
-                FROM public.""BoosterPack"";
+                FROM public.""BoosterPack""
                 WHERE ""User_ID"" = @userID
                 LIMIT 1;";
 

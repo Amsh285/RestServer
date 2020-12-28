@@ -4,9 +4,9 @@ using System.Text;
 
 namespace MonsterTradingCardGame.Infrastructure.Authentication
 {
-    public sealed class InvalidCookieFormatException : Exception
+    public sealed class InvalidSessionTokenFormatException : Exception
     {
-        public InvalidCookieFormatException(string message)
+        public InvalidSessionTokenFormatException(string message)
             : base(message)
         {
         }

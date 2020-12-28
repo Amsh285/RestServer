@@ -1,32 +1,33 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\bachd\\OneDrive\\Documents\\WS2020Lokal\\RestServer\\RestServer.WebServer\\RestServer.WebServer.csproj": {}
+    "C:\\Users\\User\\OneDrive\\Documents\\WS2020Lokal\\RestServer\\RestServer.WebServer\\RestServer.WebServer.csproj": {}
   },
   "projects": {
-    "C:\\Users\\bachd\\OneDrive\\Documents\\WS2020Lokal\\RestServer\\RestServer.WebServer\\RestServer.WebServer.csproj": {
+    "C:\\Users\\User\\OneDrive\\Documents\\WS2020Lokal\\RestServer\\RestServer.WebServer\\RestServer.WebServer.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\bachd\\OneDrive\\Documents\\WS2020Lokal\\RestServer\\RestServer.WebServer\\RestServer.WebServer.csproj",
+        "projectUniqueName": "C:\\Users\\User\\OneDrive\\Documents\\WS2020Lokal\\RestServer\\RestServer.WebServer\\RestServer.WebServer.csproj",
         "projectName": "RestServer.WebServer",
-        "projectPath": "C:\\Users\\bachd\\OneDrive\\Documents\\WS2020Lokal\\RestServer\\RestServer.WebServer\\RestServer.WebServer.csproj",
-        "packagesPath": "C:\\Users\\bachd\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\bachd\\OneDrive\\Documents\\WS2020Lokal\\RestServer\\RestServer.WebServer\\obj\\",
+        "projectPath": "C:\\Users\\User\\OneDrive\\Documents\\WS2020Lokal\\RestServer\\RestServer.WebServer\\RestServer.WebServer.csproj",
+        "packagesPath": "C:\\Users\\User\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\User\\OneDrive\\Documents\\WS2020Lokal\\RestServer\\RestServer.WebServer\\obj\\",
         "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
+        ],
         "configFilePaths": [
-          "C:\\Users\\bachd\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\User\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
           "netcoreapp3.1"
         ],
         "sources": {
-          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
           "netcoreapp3.1": {
-            "targetAlias": "netcoreapp3.1",
             "projectReferences": {}
           }
         },
@@ -38,7 +39,6 @@
       },
       "frameworks": {
         "netcoreapp3.1": {
-          "targetAlias": "netcoreapp3.1",
           "imports": [
             "net461",
             "net462",
@@ -54,7 +54,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\5.0.101\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\3.1.403\\RuntimeIdentifierGraph.json"
         }
       }
     }

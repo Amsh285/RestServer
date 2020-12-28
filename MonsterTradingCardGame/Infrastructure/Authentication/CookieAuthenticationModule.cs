@@ -10,6 +10,12 @@ namespace MonsterTradingCardGame.Infrastructure.Authentication
 {
     public static class CookieAuthenticationModule
     {
+        static CookieAuthenticationModule()
+        {
+            database = new PostgreSqlDatabase("Host=localhost;Port=5433;Username=postgres;Password=Badger123!;Database=MonsterTradingCardGame");
+            userSessionRepository = new UserSessionRepository(database);
+        }
+
         public static UserSession GetUserSessionFromRequest(RequestContext context, NpgsqlTransaction transaction = null)
         {
             Assert.NotNull(context, nameof(context));
@@ -40,8 +46,7 @@ namespace MonsterTradingCardGame.Infrastructure.Authentication
             return session;
         }
 
-        private static readonly UserSessionRepository userSessionRepository = new UserSessionRepository(database);
-
-        private static readonly PostgreSqlDatabase database = new PostgreSqlDatabase("Host=localhost;Port=5433;Username=postgres;Password=Badger123!;Database=MonsterTradingCardGame");
+        private static readonly UserSessionRepository userSessionRepository;
+        private static readonly PostgreSqlDatabase database;
     }
 }

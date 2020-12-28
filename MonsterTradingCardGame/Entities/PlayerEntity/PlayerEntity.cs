@@ -25,7 +25,10 @@ namespace MonsterTradingCardGame.Entities.PlayerEntity
                 User user = userRepository.GetUser(session.UserID, transaction);
                 Assert.NotNull(user, nameof(user));
 
-                BoosterPack firstBoosterPack = boosterRepository.GetFirstBooserpackage(user.UserID, transaction);
+                if (!boosterRepository.HasBoosterPackages(user.UserID, transaction))
+                    throw new NoBoosterPackageAssignedException($"Cannot Open Booster- package. No Booster- Packages found for User: {user.UserName}.");
+
+                BoosterPack firstBoosterPack = boosterRepository.GetFirstBooserPackage(user.UserID, transaction);
                 Assert.NotNull(firstBoosterPack, nameof(firstBoosterPack));
 
                 foreach (BoosterPackCard assignedCard in firstBoosterPack.AssignedCards)

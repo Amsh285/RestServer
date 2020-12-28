@@ -24,7 +24,11 @@ namespace MonsterTradingCardGame.Controllers
             try
             {
                 playerEntity.OpenFirstBoosterPackage(requestContext);
-                return Ok();
+                return Ok("Booster Package opened Successful.");
+            }
+            catch(NoBoosterPackageAssignedException noBoosterAssignedEx)
+            {
+                return BadRequest(noBoosterAssignedEx.Message);
             }
             catch (SessionTokenNotFoundException nfEx)
             {
