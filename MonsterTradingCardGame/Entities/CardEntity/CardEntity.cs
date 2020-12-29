@@ -12,7 +12,7 @@ namespace MonsterTradingCardGame.Entities.CardEntity
         public void CreateCard(Card value)
         {
             Assert.NotNull(value, nameof(value));
-            Validate.NotNullOrWhiteSpace(value.Name, "Der Name darf nicht lerr sein.");
+            Validate.NotNullOrWhiteSpace(value.Name, "Der Name darf nicht leer sein.");
 
             using (NpgsqlConnection connection = database.CreateAndOpenConnection())
             using (NpgsqlTransaction transaction = connection.BeginTransaction())

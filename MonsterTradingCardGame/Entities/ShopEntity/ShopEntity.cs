@@ -28,7 +28,7 @@ namespace MonsterTradingCardGame.Entities.ShopEntity
                 User customer = userRepository.GetUser(session.UserID, transaction);
                 Assert.NotNull(customer, nameof(customer));
 
-                if (customer.Coins < 4)
+                if (customer.Coins < 5)
                     throw new InsufficientFundsException($"Booster package cannot be bought. Customer: {customer.UserName} doesn´t have enough Coins.");
 
                 int boosterID = boosterRepository.InsertBooster(customer.UserID, transaction);
@@ -38,10 +38,15 @@ namespace MonsterTradingCardGame.Entities.ShopEntity
                 
                 for(int i = 0;i < 5;++i)
                 {
-                    int cardNumber = rnd.Next() % cardCount;
+                    int cardNumber = (rnd.Next() % (cardCount - 1));
+                    ++cardNumber;
+
                     int cardID = boosterRepository.GetCardIDFromCardNumber(cardNumber, transaction);
                     boosterRepository.AssignCardToBooser(cardID, boosterID, transaction);
                 }
+
+                customer.Coins -= 5;
+                userRepository.UpdateUser(customer, transaction);
 
                 transaction.Commit();
             }

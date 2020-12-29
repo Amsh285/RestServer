@@ -44,6 +44,11 @@ namespace RestServer.WebServer.CommunicationObjects
             return StatusMessage(HttpStatusCode.NotFound, client, errorMessage);
         }
 
+        public static HttpStatusCodeResult Forbidden(TcpClient client, string errorMessage = null)
+        {
+            return StatusMessage(HttpStatusCode.Forbidden, client, errorMessage);
+        }
+
         public static HttpStatusCodeResult InternalServerError(TcpClient client, string errorMessage = null)
         {
             return StatusMessage(HttpStatusCode.InternalServerError, client, errorMessage);

@@ -31,6 +31,11 @@ namespace RestServer.WebServer.EndpointHandling
             return HttpStatusCodeResult.NotFound(client, errorMessage);
         }
 
+        protected IActionResult Forbidden(string errorMessage = null)
+        {
+            return HttpStatusCodeResult.Forbidden(client, errorMessage);
+        }
+
         protected IActionResult Json(object value)
         {
             return new JsonResult(value, client);

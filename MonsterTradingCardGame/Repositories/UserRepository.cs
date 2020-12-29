@@ -13,6 +13,34 @@ namespace MasterTradingCardGame.Repositories
 {
     public sealed class UserRepository
     {
+        public void UpdateUser(User user, NpgsqlTransaction transaction = null)
+        {
+            const string statement = @"UPDATE public.""User""
+                SET ""UserName"" = @username, ""FirstName"" = @firstName, ""LastName"" = @lastName,
+                ""Email"" = @email, ""Password"" = @password, ""Salt"" = @salt, ""HashAlgorithm"" = @hashalgorithm,
+                ""Coins"" = @coins, ""Rating"" = @rating, ""GamesPlayed"" = @gamesPlayed, ""Winrate"" = @winrate
+               WHERE ""User_ID"" = @userID;";
+
+            NpgsqlParameter[] parameters = new NpgsqlParameter[]
+            {
+                new NpgsqlParameter("username", user.UserName),
+                new NpgsqlParameter("firstName", user.FirstName),
+                new NpgsqlParameter("lastName", user.LastName),
+                new NpgsqlParameter("email", user.Email),
+                new NpgsqlParameter("password", user.Password),
+                new NpgsqlParameter("salt", user.Salt),
+                new NpgsqlParameter("hashalgorithm", user.HashAlgorithm),
+                new NpgsqlParameter("coins", user.Coins),
+                new NpgsqlParameter("rating", user.Rating),
+                new NpgsqlParameter("gamesPlayed", user.GamesPlayed),
+                new NpgsqlParameter("winrate", user.Winrate),
+
+                new NpgsqlParameter("userID", user.UserID),
+            };
+
+            database.ExecuteNonQuery(statement, transaction, parameters);
+        }
+
         //ev refactoren
         public void Register(RegisterUser newUser)
         {

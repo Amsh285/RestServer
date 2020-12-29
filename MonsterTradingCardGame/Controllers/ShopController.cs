@@ -25,8 +25,16 @@ namespace MonsterTradingCardGame.Controllers
 
             if (Guid.TryParse(requestContext.Cookies[ProjectConstants.AuthenticationTokenKey], out Guid sessionToken))
             {
-                shopEntity.BuyBoosterPackage(sessionToken);
-                return Ok();
+                try
+                {
+                    shopEntity.BuyBoosterPackage(sessionToken);
+                }
+                catch (InsufficientFundsException insufficientFundsEx)
+                {
+                    return Forbidden(insufficientFundsEx.Message);
+                }
+
+                return Ok("New package bought.");
             }
             else
                 return BadRequest($"Invalid AuthenticationToken- Format.");
