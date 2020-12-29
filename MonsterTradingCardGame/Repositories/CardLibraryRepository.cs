@@ -1,4 +1,6 @@
 ﻿using MasterTradingCardGame.Database;
+using MonsterTradingCardGame.Models;
+using MonsterTradingCardGame.Infrastructure.Extensions;
 using Npgsql;
 using RestServer.WebServer.Infrastructure;
 using System;
@@ -65,6 +67,46 @@ namespace MonsterTradingCardGame.Repositories
             };
 
             database.ExecuteNonQuery(statement, transaction, parameters);
+        }
+
+        public IEnumerable<CardLibraryItem> GetCardLibraryItemsByUserID(int userID, NpgsqlTransaction transaction = null)
+        {
+            return GetCardLibraryItemsWhere("\"User_ID\" = @userID", transaction, new NpgsqlParameter("userID", userID));
+        }
+
+        private IEnumerable<CardLibraryItem> GetCardLibraryItemsWhere(string whereCondition,
+            NpgsqlTransaction transaction, params NpgsqlParameter[] parameters)
+        {
+            const string statement = @"SELECT ""CardLibrary_ID"", ""User_ID"", ""Name"", ""Description"",
+                ""ElementType"", ""CardType"", ""AttackPoints"", ""Quantity""
+                FROM public.""CardLibrary""
+                JOIN public.""Card"" ON ""Card"".""Card_ID"" = ""CardLibrary"".""Card_ID""";
+
+            StringBuilder sql = new StringBuilder();
+            sql.AppendLine(statement);
+
+            if (!string.IsNullOrWhiteSpace(whereCondition))
+            {
+                sql.Append("WHERE ");
+                sql.AppendLine(whereCondition);
+            }
+
+            return database.Execute(sql.ToString(), transaction, ReadCardLibraryRow, parameters);
+        }
+
+        private CardLibraryItem ReadCardLibraryRow(NpgsqlDataReader reader)
+        {
+            return new CardLibraryItem()
+            {
+                CardLibrary_ID = reader.GetValue<int>("CardLibrary_ID"),
+                User_ID = reader.GetValue<int>("User_ID"),
+                Name = reader.GetValue<string>("Name"),
+                Description = reader.GetValue<string>("Description"),
+                Element = Enum.Parse<ElementType>(reader.GetValue<string>("ElementType")),
+                Type = Enum.Parse<CardType>(reader.GetValue<string>("CardType")),
+                AttackPoints = reader.GetValue<int>("AttackPoints"),
+                Quantity = reader.GetValue<int>("Quantity")
+            };
         }
 
         private readonly PostgreSqlDatabase database;

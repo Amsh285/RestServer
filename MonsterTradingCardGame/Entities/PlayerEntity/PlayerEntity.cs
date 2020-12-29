@@ -1,16 +1,13 @@
 ﻿using MasterTradingCardGame.Database;
 using MasterTradingCardGame.Models;
 using MasterTradingCardGame.Repositories;
-using MonsterTradingCardGame.Infrastructure;
 using MonsterTradingCardGame.Infrastructure.Authentication;
 using MonsterTradingCardGame.Models;
 using MonsterTradingCardGame.Repositories;
 using Npgsql;
 using RestServer.WebServer.CommunicationObjects;
 using RestServer.WebServer.Infrastructure;
-using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace MonsterTradingCardGame.Entities.PlayerEntity
 {
@@ -18,6 +15,8 @@ namespace MonsterTradingCardGame.Entities.PlayerEntity
     {
         public void OpenFirstBoosterPackage(RequestContext requestContext)
         {
+            Assert.NotNull(requestContext, nameof(requestContext));
+
             using (NpgsqlConnection connection = database.CreateAndOpenConnection())
             using (NpgsqlTransaction transaction = connection.BeginTransaction())
             {
@@ -39,8 +38,19 @@ namespace MonsterTradingCardGame.Entities.PlayerEntity
             }
         }
 
+        public IEnumerable<CardLibraryItem> GetCardLibrary(RequestContext requestContext)
+        {
+            Assert.NotNull(requestContext, nameof(requestContext));
+
+            using (NpgsqlConnection connection = database.CreateAndOpenConnection())
+            using (NpgsqlTransaction transaction = connection.BeginTransaction())
+            {
+                UserSession session = CookieAuthenticationModule.GetUserSessionFromRequest(requestContext, transaction);
+                return cardLibraryRepository.GetCardLibraryItemsByUserID(session.UserID, transaction);
+            }
+        }
+
         private readonly UserRepository userRepository = new UserRepository();
-        private readonly UserSessionRepository userSessionRepository = new UserSessionRepository(database);
         private readonly CardLibraryRepository cardLibraryRepository = new CardLibraryRepository(database);
         private readonly BoosterRepository boosterRepository = new BoosterRepository(database);
 

@@ -112,7 +112,8 @@ echo.
 
 
 REM --------------------------------------------------
-echo 3.3 Buy Boosters
+echo 4) Buy Boosters
+echo 4) altenhof Buy Boosters
 
 curl -X POST http://127.0.0.1:13001/Shop/Booster --cookie altenhof.kekse
 echo.
@@ -122,15 +123,30 @@ echo.
 
 curl -X POST http://127.0.0.1:13001/Shop/Booster --cookie altenhof.kekse
 echo.
+
+curl -X POST http://127.0.0.1:13001/Shop/Booster --cookie altenhof.kekse
+echo.
+
+echo 4) kienboec Buy Boosters
 
 curl -X POST http://127.0.0.1:13001/Shop/Booster --cookie kienboec.kekse
 echo.
 
 curl -X POST http://127.0.0.1:13001/Shop/Booster --cookie kienboec.kekse
+echo.
+
+curl -X POST http://127.0.0.1:13001/Shop/Booster --cookie kienboec.kekse
+echo.
+
+echo 4) should Fail
+
+curl -X POST http://127.0.0.1:13001/Shop/Booster --cookie altenhof.kekse
 echo.
 
 REM --------------------------------------------------
-echo 3.4 Open Boosters
+echo 5) Open Boosters
+
+echo 5) Open Boosters altenhof
 
 curl -X POST http://127.0.0.1:13001/User/OpenFirstBoosterPackage --cookie altenhof.kekse
 echo.
@@ -140,6 +156,11 @@ echo.
 
 curl -X POST http://127.0.0.1:13001/User/OpenFirstBoosterPackage --cookie altenhof.kekse
 echo.
+
+curl -X POST http://127.0.0.1:13001/User/OpenFirstBoosterPackage --cookie altenhof.kekse
+echo.
+
+echo 5) Open Boosters kienboec
 
 curl -X POST http://127.0.0.1:13001/User/OpenFirstBoosterPackage --cookie kienboec.kekse
 echo.
@@ -147,7 +168,10 @@ echo.
 curl -X POST http://127.0.0.1:13001/User/OpenFirstBoosterPackage --cookie kienboec.kekse
 echo.
 
-echo 3.4 Should fail
+curl -X POST http://127.0.0.1:13001/User/OpenFirstBoosterPackage --cookie kienboec.kekse
+echo.
+
+echo 5) Should fail
 
 curl -X POST http://127.0.0.1:13001/User/OpenFirstBoosterPackage --cookie altenhof.kekse
 echo.
@@ -155,3 +179,15 @@ echo.
 curl -X POST http://127.0.0.1:13001/User/OpenFirstBoosterPackage --cookie kienboec.kekse
 echo.
 
+REM --------------------------------------------------
+echo 6) Show Aquired Cards altenhof
+
+curl -X GET http://127.0.0.1:13001/User/ShowCardLibrary --cookie altenhof.kekse
+echo.
+
+echo 6) Show Aquired Cards kienboec
+
+curl -X GET http://127.0.0.1:13001/User/ShowCardLibrary --cookie kienboec.kekse
+echo.
+
+REM --------------------------------------------------

@@ -1,6 +1,7 @@
 ﻿using MonsterTradingCardGame.Entities.PlayerEntity;
 using MonsterTradingCardGame.Infrastructure;
 using MonsterTradingCardGame.Infrastructure.Authentication;
+using MonsterTradingCardGame.Models;
 using RestServer.WebServer.CommunicationObjects;
 using RestServer.WebServer.EndpointHandling;
 using RestServer.WebServer.EndpointHandling.Attributes;
@@ -29,6 +30,24 @@ namespace MonsterTradingCardGame.Controllers
             catch(NoBoosterPackageAssignedException noBoosterAssignedEx)
             {
                 return BadRequest(noBoosterAssignedEx.Message);
+            }
+            catch (SessionTokenNotFoundException nfEx)
+            {
+                return Unauthorized(nfEx.Message);
+            }
+            catch (Exception ex) when (ex is InvalidSessionTokenFormatException || ex is SessionExpiredException)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpGet("ShowCardLibrary")]
+        public IActionResult ShowCardLibrary()
+        {
+            try
+            {
+                IEnumerable<CardLibraryItem> cardLibraryItems = playerEntity.GetCardLibrary(requestContext);
+                return Json(cardLibraryItems);
             }
             catch (SessionTokenNotFoundException nfEx)
             {

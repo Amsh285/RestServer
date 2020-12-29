@@ -45,7 +45,8 @@ namespace MonsterTradingCardGame.Entities.ShopEntity
                     boosterRepository.AssignCardToBooser(cardID, boosterID, transaction);
                 }
 
-                //Todo: decrease coins
+                customer.Coins -= 5;
+                userRepository.UpdateUser(customer, transaction);
 
                 transaction.Commit();
             }

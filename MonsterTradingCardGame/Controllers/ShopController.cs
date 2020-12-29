@@ -31,7 +31,7 @@ namespace MonsterTradingCardGame.Controllers
                 }
                 catch (InsufficientFundsException insufficientFundsEx)
                 {
-                    return Ok(insufficientFundsEx.Message);
+                    return Forbidden(insufficientFundsEx.Message);
                 }
 
                 return Ok("New package bought.");
