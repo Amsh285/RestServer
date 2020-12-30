@@ -71,7 +71,10 @@ namespace RestServer.WebServer.EndpointHandling
                     }
                 }
                 else
-                    correspondingParameter = match.MatchingActionPathSegments[actionParameterIndex];
+                {
+                    string routeParameter = match.MatchingActionPathSegments[actionParameterIndex];
+                    correspondingParameter = ConvertToDeserializeableString(routeParameter, actionParameter);
+                }
 
                 try
                 {
@@ -94,11 +97,15 @@ namespace RestServer.WebServer.EndpointHandling
         private static string ExtractFromRequestHeader(RequestContext context, ParameterInfo actionParameter)
         {
             string headerValue = context.Parameters.HeaderEntries[actionParameter.Name].First();
+            return ConvertToDeserializeableString(headerValue, actionParameter);
+        }
 
+        private static string ConvertToDeserializeableString(string value, ParameterInfo actionParameter)
+        {
             if (actionParameter.ParameterType == typeof(string))
-                return $"\"{headerValue}\"";
+                return $"\"{value}\"";
             else
-                return headerValue;
+                return value;
         }
 
         private static byte[] ExtractFromRequestBody(RouteMatch match, RequestContext context, RequestBodyExtractor bodyExtractor, ParameterInfo actionParameter)

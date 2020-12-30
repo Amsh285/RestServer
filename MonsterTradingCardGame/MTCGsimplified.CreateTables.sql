@@ -19,11 +19,10 @@ CREATE TABLE "Deck" (
   "Name" varchar(50) NOT NULL
 );
 
-CREATE TABLE "DeckContent" (
-  "DeckContent_ID" SERIAL PRIMARY KEY,
+CREATE TABLE "Deck_Cards" (
+  "Deck_Cards_ID" SERIAL PRIMARY KEY,
   "Deck_ID" int NOT NULL,
-  "Card_ID" int NOT NULL,
-  "Quantity" int NOT NULL
+  "Card_ID" int NOT NULL
 );
 
 CREATE TABLE "CardLibrary" (
@@ -64,9 +63,9 @@ CREATE TABLE "UserSession" (
 
 ALTER TABLE "Deck" ADD FOREIGN KEY ("User_ID") REFERENCES "User" ("User_ID");
 
-ALTER TABLE "DeckContent" ADD FOREIGN KEY ("Deck_ID") REFERENCES "Deck" ("Deck_ID");
+ALTER TABLE "Deck_Cards" ADD FOREIGN KEY ("Deck_ID") REFERENCES "Deck" ("Deck_ID");
 
-ALTER TABLE "DeckContent" ADD FOREIGN KEY ("Card_ID") REFERENCES "Card" ("Card_ID");
+ALTER TABLE "Deck_Cards" ADD FOREIGN KEY ("Card_ID") REFERENCES "Card" ("Card_ID");
 
 ALTER TABLE "CardLibrary" ADD FOREIGN KEY ("User_ID") REFERENCES "User" ("User_ID");
 

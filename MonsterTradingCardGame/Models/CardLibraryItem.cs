@@ -6,6 +6,8 @@
 
         public int User_ID { get; set; }
 
+        public int Card_ID { get; set; }
+
         public string Name { get; set; }
 
         public string Description { get; set; }

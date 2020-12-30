@@ -77,7 +77,7 @@ namespace MonsterTradingCardGame.Repositories
         private IEnumerable<CardLibraryItem> GetCardLibraryItemsWhere(string whereCondition,
             NpgsqlTransaction transaction, params NpgsqlParameter[] parameters)
         {
-            const string statement = @"SELECT ""CardLibrary_ID"", ""User_ID"", ""Name"", ""Description"",
+            const string statement = @"SELECT ""CardLibrary_ID"", ""User_ID"", ""CardLibrary"".""Card_ID"", ""Name"", ""Description"",
                 ""ElementType"", ""CardType"", ""AttackPoints"", ""Quantity""
                 FROM public.""CardLibrary""
                 JOIN public.""Card"" ON ""Card"".""Card_ID"" = ""CardLibrary"".""Card_ID""";
@@ -100,6 +100,7 @@ namespace MonsterTradingCardGame.Repositories
             {
                 CardLibrary_ID = reader.GetValue<int>("CardLibrary_ID"),
                 User_ID = reader.GetValue<int>("User_ID"),
+                Card_ID = reader.GetValue<int>("Card_ID"),
                 Name = reader.GetValue<string>("Name"),
                 Description = reader.GetValue<string>("Description"),
                 Element = Enum.Parse<ElementType>(reader.GetValue<string>("ElementType")),
