@@ -1,22 +1,23 @@
 ﻿using MasterTradingCardGame.Database;
 using MasterTradingCardGame.Models;
 using MasterTradingCardGame.Repositories;
+using MonsterTradingCardGame.Infrastructure;
 using MonsterTradingCardGame.Infrastructure.Authentication;
 using MonsterTradingCardGame.Models;
+using MonsterTradingCardGame.Repositories;
 using Npgsql;
 using RestServer.WebServer.CommunicationObjects;
 using RestServer.WebServer.Infrastructure;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading;
 
 namespace MonsterTradingCardGame.Modules
 {
     public sealed class AutomaticDuelMatchmaker
     {
-        public MatchmakingEntry FindAdversary(RequestContext requestContext)
+        public MatchmakingEntry FindMatch(RequestContext requestContext, string requestedDeck)
         {
             using (NpgsqlConnection connection = database.CreateAndOpenConnection())
             using (NpgsqlTransaction transaction = connection.BeginTransaction())
@@ -25,7 +26,9 @@ namespace MonsterTradingCardGame.Modules
                 User user = userRepository.GetUser(session.UserID, transaction);
                 Assert.NotNull(user, nameof(user));
 
-                MatchmakingEntry self = new MatchmakingEntry(user);
+                Validate.Condition(deckRepository.Exists(requestedDeck, user.UserID, transaction), $"Requested Deck: {requestedDeck} could not be found for User: {user.UserName}");
+
+                MatchmakingEntry self = new MatchmakingEntry(user, requestedDeck);
 
                 lock (duelQueue)
                 {
@@ -60,12 +63,14 @@ namespace MonsterTradingCardGame.Modules
                             Guid matchID = Guid.NewGuid();
 
                             adversary.Adversary = user;
+                            adversary.AdversaryRequestedDeck = requestedDeck;
                             adversary.IsMatched = true;
                             adversary.MatchID = matchID;
 
                             duelQueue.Remove(adversary);
 
                             self.Adversary = adversary.Self;
+                            self.AdversaryRequestedDeck = adversary.SelfRequestedDeck;
                             self.IsMatched = true;
                             self.ShouldInitiate = true;
                             self.MatchID = matchID;
@@ -86,7 +91,7 @@ namespace MonsterTradingCardGame.Modules
             }
         }
 
-
+        private readonly DeckRepository deckRepository = new DeckRepository(database);
         private readonly UserRepository userRepository = new UserRepository();
 
         private static readonly List<MatchmakingEntry> duelQueue = new List<MatchmakingEntry>();

@@ -226,9 +226,9 @@ REM --------------------------------------------------
 
 echo 9) Queue for duels
 
-echo 8) Queue for duels altenhof
-start /b "kienboec battle" curl -X POST http://127.0.0.1:13001/Battle --header "deckName: Deck01" --cookie altenhof.kekse
+echo 9) Queue for duels altenhof
+start /b "altenhof battle" curl -X POST http://127.0.0.1:13001/Battle --header "deckName: Deck01" --cookie altenhof.kekse
 
-echo 8) Queue for duels kienboec
-start /b "altenhof battle" curl -X POST http://127.0.0.1:13001/Battle --header "deckName: Deck01" --cookie kienboec.kekse
+echo 9) Queue for duels kienboec
+start /b "kienboec battle" curl -X POST http://127.0.0.1:13001/Battle --header "deckName: Deck01" --cookie kienboec.kekse
 ping localhost -n 10 >NUL 2>NUL

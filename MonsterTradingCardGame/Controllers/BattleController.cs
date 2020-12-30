@@ -6,6 +6,7 @@ using RestServer.WebServer.EndpointHandling;
 using RestServer.WebServer.EndpointHandling.Attributes;
 using RestServer.WebServer.Infrastructure;
 using System;
+using System.Threading.Tasks;
 
 namespace MonsterTradingCardGame.Controllers
 {
@@ -23,9 +24,10 @@ namespace MonsterTradingCardGame.Controllers
         {
             try
             {
-                MatchmakingEntry match = duelModule.FindAdversary(requestContext);
+                MatchmakingEntry match = matchmaker.FindMatch(requestContext, deckName);
 
-                //Todo: GetDecks and start workerThread with autoduel
+                if(match != null && match.IsMatched && match.ShouldInitiate)
+                    Task.Run(() => duelModule.ExecuteDuel(match, ProjectConstants.MaxNumberOfRounds));
 
                 return Json(match);
             }
@@ -33,13 +35,15 @@ namespace MonsterTradingCardGame.Controllers
             {
                 return Unauthorized(nfEx.Message);
             }
-            catch (Exception ex) when (ex is InvalidSessionTokenFormatException || ex is SessionExpiredException)
+            catch (Exception ex) when (ex is InvalidSessionTokenFormatException || ex is SessionExpiredException
+                || ex is ValidationException)
             {
                 return BadRequest(ex.Message);
             }
         }
 
-        private readonly AutomaticDuelMatchmaker duelModule = new AutomaticDuelMatchmaker();
+        private readonly AutomaticDuelMatchmaker matchmaker = new AutomaticDuelMatchmaker();
+        private readonly AutomaticDuelModule duelModule = new AutomaticDuelModule();
         private readonly RequestContext requestContext;
     }
 }

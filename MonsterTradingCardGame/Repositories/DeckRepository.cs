@@ -90,10 +90,8 @@ namespace MonsterTradingCardGame.Repositories
                 .FirstOrDefault();
 
             if (result != null)
-            {
-                IEnumerable<Card> assignedCards = GetCardsFromDeckID(result.Deck_ID, transaction);
-                result.Cards = assignedCards;
-            }
+                result.Cards = GetCardsFromDeckID(result.Deck_ID, transaction)
+                    .ToList();
 
             return result;
         }

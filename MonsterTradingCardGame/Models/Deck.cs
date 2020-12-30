@@ -11,6 +11,6 @@ namespace MonsterTradingCardGame.Models
 
         public User Player { get; set; }
 
-        public IEnumerable<Card> Cards { get; set; }
+        public List<Card> Cards { get; set; }
     }
 }
