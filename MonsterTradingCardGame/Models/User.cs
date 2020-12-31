@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Text.Json.Serialization;
 
 namespace MasterTradingCardGame.Models
 {
@@ -16,10 +14,13 @@ namespace MasterTradingCardGame.Models
 
         public string Email { get; set; }
 
+        [JsonIgnore]
         public byte[] Password { get; set; }
 
+        [JsonIgnore]
         public byte[] Salt { get; set; }
 
+        [JsonIgnore]
         public string HashAlgorithm { get; set; }
 
         public int Coins { get; set; }

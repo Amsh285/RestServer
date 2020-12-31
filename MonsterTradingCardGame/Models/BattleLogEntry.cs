@@ -4,9 +4,11 @@
     {
         public int BattleLogEntry_ID { get; set; }
 
-        public Card Card1 { get; set; }
+        public int BattleLog_ID { get; set; }
 
-        public Card Card2 { get; set; }
+        public BattleLogCard Card1 { get; set; }
+
+        public BattleLogCard Card2 { get; set; }
 
         public string DeckState1 { get; set; }
 

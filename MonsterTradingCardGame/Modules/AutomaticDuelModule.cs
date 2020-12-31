@@ -7,12 +7,20 @@ using RestServer.WebServer.Infrastructure;
 using System;
 using System.Collections.Generic;
 using System.Text;
-using System.Text.Json;
 
 namespace MonsterTradingCardGame.Modules
 {
     public sealed class AutomaticDuelModule
     {
+        public BattleLog GetBattleLog(Guid matchID)
+        {
+            using (NpgsqlConnection connection = database.CreateAndOpenConnection())
+            using (NpgsqlTransaction transaction = connection.BeginTransaction())
+            {
+                return battleLogRepository.GetBattleLogFromMatchID(matchID, transaction);
+            }
+        }
+
         public void ExecuteDuel(MatchmakingEntry match, int maxNumberOfRounds)
         {
             Assert.NotNull(match, nameof(match));
@@ -82,12 +90,12 @@ namespace MonsterTradingCardGame.Modules
                     else
                     {
                         roundDescriptionBuilder.Append(BuildWinnerSummary(deck2.Player, currentRound));
-                        deck2.Cards.Add(card2);
-                        deck1.Cards.Remove(card2);
+                        deck2.Cards.Add(card1);
+                        deck1.Cards.Remove(card1);
                     }
 
-                    logEntry.DeckState1 = JsonSerializer.Serialize(deck1, typeof(Deck));
-                    logEntry.DeckState2 = JsonSerializer.Serialize(deck2, typeof(Deck));
+                    logEntry.DeckState1 = deck1.GenerateDeckStateString();
+                    logEntry.DeckState2 = deck2.GenerateDeckStateString();
                     logEntry.RoundDescription = roundDescriptionBuilder.ToString();
 
                     battleLogEntries.Add(logEntry);
@@ -105,7 +113,6 @@ namespace MonsterTradingCardGame.Modules
                 };
 
                 int battleLogID = battleLogRepository.InsertBattleLog(battleLog, transaction);
-
                 foreach (InsertBattleLogEntryModel logEntryModel in battleLogEntries)
                     battleLogRepository.InsertBattleLogEntry(battleLogID, logEntryModel, transaction);
 

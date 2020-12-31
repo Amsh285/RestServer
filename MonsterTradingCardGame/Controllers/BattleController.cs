@@ -1,11 +1,14 @@
 ﻿using MonsterTradingCardGame.Infrastructure;
 using MonsterTradingCardGame.Infrastructure.Authentication;
+using MonsterTradingCardGame.Models;
 using MonsterTradingCardGame.Modules;
 using RestServer.WebServer.CommunicationObjects;
 using RestServer.WebServer.EndpointHandling;
 using RestServer.WebServer.EndpointHandling.Attributes;
 using RestServer.WebServer.Infrastructure;
 using System;
+using System.Diagnostics;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace MonsterTradingCardGame.Controllers
@@ -19,6 +22,15 @@ namespace MonsterTradingCardGame.Controllers
             this.requestContext = requestContext;
         }
 
+        [HttpGet("Battlelog")]
+        public IActionResult GetBattleResult(MatchmakingEntry match)
+        {
+            Assert.NotNull(match, nameof(match));
+
+            BattleLog result = duelModule.GetBattleLog(match.MatchID);
+            return Json(result, new JsonSerializerOptions() { WriteIndented = true });
+        }
+
         [HttpPost]
         public IActionResult InitiateAutomaticDuel(string deckName)
         {
@@ -26,10 +38,10 @@ namespace MonsterTradingCardGame.Controllers
             {
                 MatchmakingEntry match = matchmaker.FindMatch(requestContext, deckName);
 
-                if(match != null && match.IsMatched && match.ShouldInitiate)
-                    Task.Run(() => duelModule.ExecuteDuel(match, ProjectConstants.MaxNumberOfRounds));
+                if (match != null && match.IsMatched && match.ShouldInitiate)
+                    Task.Run(() => ExecuteDuel(match));
 
-                return Json(match);
+                return Json(match, new JsonSerializerOptions() { WriteIndented = true });
             }
             catch (SessionTokenNotFoundException nfEx)
             {
@@ -39,6 +51,18 @@ namespace MonsterTradingCardGame.Controllers
                 || ex is ValidationException)
             {
                 return BadRequest(ex.Message);
+            }
+        }
+
+        private void ExecuteDuel(MatchmakingEntry match)
+        {
+            try
+            {
+                duelModule.ExecuteDuel(match, ProjectConstants.MaxNumberOfRounds);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex.Message);
             }
         }
 

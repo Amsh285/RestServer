@@ -20,6 +20,10 @@ namespace MonsterTradingCardGame.Modules
 
         public Guid MatchID { get; set; }
 
+        public MatchmakingEntry()
+        {
+        }
+
         public MatchmakingEntry(User self, string selfRequestedDeck)
         {
             Assert.NotNull(self, nameof(self));

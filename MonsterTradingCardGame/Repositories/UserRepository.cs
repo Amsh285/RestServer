@@ -99,6 +99,17 @@ namespace MasterTradingCardGame.Repositories
             );
         }
 
+        public User GetUserFromDeckID(int deckID, NpgsqlTransaction transaction = null)
+        {
+            const string statement = @"SELECT ""User_ID""
+                FROM public.""Deck""
+                WHERE ""Deck_ID"" = @deckID;";
+
+            int userID = database.ExecuteScalar<int>(statement, transaction, new NpgsqlParameter("deckID", deckID));
+
+            return GetUser(userID, transaction);
+        }
+
         public User GetUser(string userName, NpgsqlTransaction transaction = null)
         {
             return GetUsersWhere("\"UserName\" = @userName", transaction, new NpgsqlParameter("userName", userName))
