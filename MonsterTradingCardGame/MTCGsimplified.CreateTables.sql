@@ -61,6 +61,28 @@ CREATE TABLE "UserSession" (
   "ExpirationDate" timestamp NOT NULL
 );
 
+CREATE TABLE "BattleLog" (
+  "BattleLog_ID" SERIAL PRIMARY KEY,
+  "Match_ID" uuid NOT NULL,
+  "Deck_ID_1" int NOT NULL,
+  "Deck_ID_2" int NOT NULL,
+  "User_ID_Winner" int,
+  "BattleResult" varchar(100),
+  "Turns" int NOT NULL,
+  "CreationDate" timestamp NOT NULL
+);
+
+CREATE TABLE "BattleLogEntry" (
+  "BattleLogEntry_ID" SERIAL PRIMARY KEY,
+  "BattleLog_ID" int NOT NULL,
+  "Card_ID_1" int NOT NULL,
+  "Card_ID_2" int NOT NULL,
+  "DeckState_1" varchar(3000),
+  "DeckState_2" varchar(3000),
+  "RoundDescription" varchar(3000),
+  "Order" int NOT NULL
+);
+
 ALTER TABLE "Deck" ADD FOREIGN KEY ("User_ID") REFERENCES "User" ("User_ID");
 
 ALTER TABLE "Deck_Cards" ADD FOREIGN KEY ("Deck_ID") REFERENCES "Deck" ("Deck_ID");
@@ -78,3 +100,15 @@ ALTER TABLE "BoosterPack_Cards" ADD FOREIGN KEY ("BoosterPack_ID") REFERENCES "B
 ALTER TABLE "BoosterPack_Cards" ADD FOREIGN KEY ("Card_ID") REFERENCES "Card" ("Card_ID");
 
 ALTER TABLE "UserSession" ADD FOREIGN KEY ("User_ID") REFERENCES "User" ("User_ID");
+
+ALTER TABLE "BattleLog" ADD FOREIGN KEY ("Deck_ID_1") REFERENCES "Deck" ("Deck_ID");
+
+ALTER TABLE "BattleLog" ADD FOREIGN KEY ("Deck_ID_2") REFERENCES "Deck" ("Deck_ID");
+
+ALTER TABLE "BattleLog" ADD FOREIGN KEY ("User_ID_Winner") REFERENCES "User" ("User_ID");
+
+ALTER TABLE "BattleLogEntry" ADD FOREIGN KEY ("BattleLog_ID") REFERENCES "BattleLog" ("BattleLog_ID");
+
+ALTER TABLE "BattleLogEntry" ADD FOREIGN KEY ("Card_ID_1") REFERENCES "Card" ("Card_ID");
+
+ALTER TABLE "BattleLogEntry" ADD FOREIGN KEY ("Card_ID_2") REFERENCES "Card" ("Card_ID");

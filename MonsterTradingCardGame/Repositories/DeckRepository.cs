@@ -61,6 +61,34 @@ namespace MonsterTradingCardGame.Repositories
             database.ExecuteNonQuery(statement, transaction, parameters);
         }
 
+        public Deck GetDeck(User user, int deckID, NpgsqlTransaction transaction = null)
+        {
+            Assert.NotNull(user, nameof(user));
+
+            const string statement = @"SELECT ""Deck_ID"", ""Name""
+                FROM public.""Deck""
+                WHERE ""Deck_ID"" = @deckId;";
+
+            Deck ReadDeckRow(NpgsqlDataReader reader)
+            {
+                return new Deck()
+                {
+                    Deck_ID = reader.GetValue<int>("Deck_ID"),
+                    Name = reader.GetValue<string>("Name"),
+                    Player = user
+                };
+            }
+
+            Deck result = database.Execute(statement, transaction, ReadDeckRow, new NpgsqlParameter("deckId", deckID))
+                .FirstOrDefault();
+
+            if (result != null)
+                result.Cards = GetCardsFromDeckID(result.Deck_ID, transaction)
+                    .ToList();
+
+            return result;
+        }
+
         public Deck GetDeck(User user, string name, NpgsqlTransaction transaction = null)
         {
             Assert.NotNull(user, nameof(user));
@@ -90,10 +118,8 @@ namespace MonsterTradingCardGame.Repositories
                 .FirstOrDefault();
 
             if (result != null)
-            {
-                IEnumerable<Card> assignedCards = GetCardsFromDeckID(result.Deck_ID, transaction);
-                result.Cards = assignedCards;
-            }
+                result.Cards = GetCardsFromDeckID(result.Deck_ID, transaction)
+                    .ToList();
 
             return result;
         }

@@ -8,7 +8,11 @@ namespace MonsterTradingCardGame.Modules
     {
         public User Self { get; set; }
 
+        public string SelfRequestedDeck { get; set; }
+
         public User Adversary { get; set; }
+
+        public string AdversaryRequestedDeck { get; set; }
 
         public bool IsMatched { get; set; }
 
@@ -16,11 +20,17 @@ namespace MonsterTradingCardGame.Modules
 
         public Guid MatchID { get; set; }
 
-        public MatchmakingEntry(User self)
+        public MatchmakingEntry()
+        {
+        }
+
+        public MatchmakingEntry(User self, string selfRequestedDeck)
         {
             Assert.NotNull(self, nameof(self));
+            Assert.NotNull(selfRequestedDeck, nameof(selfRequestedDeck));
 
             this.Self = self;
+            this.SelfRequestedDeck = selfRequestedDeck;
             this.IsMatched = false;
             this.ShouldInitiate = false;
         }

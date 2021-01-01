@@ -226,9 +226,17 @@ REM --------------------------------------------------
 
 echo 9) Queue for duels
 
-echo 8) Queue for duels altenhof
-start /b "kienboec battle" curl -X POST http://127.0.0.1:13001/Battle --header "deckName: Deck01" --cookie altenhof.kekse
+echo 9) Queue for duels altenhof
+start /b "altenhof battle" curl -X POST http://127.0.0.1:13001/Battle --header "deckName: Deck01" --cookie altenhof.kekse -o ./Response/altenhof.txt
 
-echo 8) Queue for duels kienboec
-start /b "altenhof battle" curl -X POST http://127.0.0.1:13001/Battle --header "deckName: Deck01" --cookie kienboec.kekse
+echo 9) Queue for duels kienboec
+start /b "kienboec battle" curl -X POST http://127.0.0.1:13001/Battle --header "deckName: Deck01" --cookie kienboec.kekse -o ./Response/kienboec.txt
 ping localhost -n 10 >NUL 2>NUL
+
+
+REM --------------------------------------------------
+echo 10) Get Battlelog
+
+curl -X GET http://127.0.0.1:13001/Battle/Battlelog --header "Content-Type: Json" --cookie kienboec.kekse --data-binary @./Response/kienboec.txt -o ./Response/BattleResult_kienboec.txt
+echo.
+
