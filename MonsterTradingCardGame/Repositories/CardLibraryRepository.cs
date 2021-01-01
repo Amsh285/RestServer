@@ -31,6 +31,28 @@ namespace MonsterTradingCardGame.Repositories
             return database.ExecuteScalar<bool>(statement, transaction, parameters);
         }
 
+        public bool CardIsAvailableForTrading(int cardID, int userID, NpgsqlTransaction transaction = null)
+        {
+            const string statement = @"SELECT (SELECT COALESCE(MAX(c), 0) FROM
+                (SELECT COUNT(*) AS c
+                FROM public.""Deck""
+                JOIN public.""Deck_Cards"" ON ""Deck_Cards"".""Deck_ID"" = ""Deck"".""Deck_ID""
+                WHERE ""Deck"".""User_ID"" = @userID AND ""Deck_Cards"".""Card_ID"" = @cardID
+                GROUP BY ""Deck_Cards"".""Deck_ID"") AS asd) <
+
+                (SELECT COALESCE(SUM(""Quantity""), 0)
+                FROM public.""CardLibrary""
+                WHERE ""CardLibrary"".""User_ID"" = @userID AND ""CardLibrary"".""Card_ID"" = @cardID);";
+
+            NpgsqlParameter[] parameters = new NpgsqlParameter[]
+            {
+                new NpgsqlParameter("userID", userID),
+                new NpgsqlParameter("cardID", cardID)
+            };
+
+            return database.ExecuteScalar<bool>(statement, transaction, parameters);
+        }
+
         public void AddCardToLibrary(int cardID, int userID, NpgsqlTransaction transaction = null)
         {
             if (CardExists(cardID, userID, transaction))
@@ -42,7 +64,7 @@ namespace MonsterTradingCardGame.Repositories
         private void IncrementQuantity(int cardID, int userID, NpgsqlTransaction transaction = null)
         {
             const string statement = @"UPDATE public.""CardLibrary""
-                SET ""Quantity"" = ""Quantity""  + 1
+                SET ""Quantity"" = ""Quantity"" + 1
                 WHERE ""User_ID"" = @userID AND ""Card_ID"" = @cardID;";
 
             NpgsqlParameter[] parameters = new NpgsqlParameter[]

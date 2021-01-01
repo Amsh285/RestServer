@@ -83,6 +83,21 @@ CREATE TABLE "BattleLogEntry" (
   "Order" int NOT NULL
 );
 
+CREATE TABLE "Trade" (
+  "Trade_ID" uuid PRIMARY KEY,
+  "User_ID" int NOT NULL,
+  "Card_ID" int NOT NULL,
+  "CreationDate" timestamp NOT NULL
+);
+
+CREATE TABLE "Trade_Offer" (
+  "Trade_Offer_ID" uuid PRIMARY KEY,
+  "Trade_ID" uuid NOT NULL,
+  "User_ID" int NOT NULL,
+  "Card_ID" int NOT NULL,
+  "CreationDate" timestamp NOT NULL
+);
+
 ALTER TABLE "Deck" ADD FOREIGN KEY ("User_ID") REFERENCES "User" ("User_ID");
 
 ALTER TABLE "Deck_Cards" ADD FOREIGN KEY ("Deck_ID") REFERENCES "Deck" ("Deck_ID");
@@ -112,3 +127,13 @@ ALTER TABLE "BattleLogEntry" ADD FOREIGN KEY ("BattleLog_ID") REFERENCES "Battle
 ALTER TABLE "BattleLogEntry" ADD FOREIGN KEY ("Card_ID_1") REFERENCES "Card" ("Card_ID");
 
 ALTER TABLE "BattleLogEntry" ADD FOREIGN KEY ("Card_ID_2") REFERENCES "Card" ("Card_ID");
+
+ALTER TABLE "Trade" ADD FOREIGN KEY ("User_ID") REFERENCES "User" ("User_ID");
+
+ALTER TABLE "Trade" ADD FOREIGN KEY ("Card_ID") REFERENCES "Card" ("Card_ID");
+
+ALTER TABLE "Trade_Offer" ADD FOREIGN KEY ("Trade_ID") REFERENCES "Trade" ("Trade_ID");
+
+ALTER TABLE "Trade_Offer" ADD FOREIGN KEY ("User_ID") REFERENCES "User" ("User_ID");
+
+ALTER TABLE "Trade_Offer" ADD FOREIGN KEY ("Card_ID") REFERENCES "Card" ("Card_ID");
