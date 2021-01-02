@@ -6,6 +6,7 @@ using RestServer.WebServer.Infrastructure;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Linq;
 
 namespace MonsterTradingCardGame.Repositories
 {
@@ -61,10 +62,36 @@ namespace MonsterTradingCardGame.Repositories
                 InsertCard(cardID, userID, transaction);
         }
 
+        public void RemoveCardFromLibrary(CardLibraryItem card, NpgsqlTransaction transaction = null)
+        {
+            if (card.Quantity > 1)
+            {
+                DecrementQuantity(card.Card_ID, card.User_ID, transaction);
+                --card.Quantity;
+            }
+            else
+                DeleteCard(card.Card_ID, card.User_ID, transaction);
+        }
+
         private void IncrementQuantity(int cardID, int userID, NpgsqlTransaction transaction = null)
         {
             const string statement = @"UPDATE public.""CardLibrary""
                 SET ""Quantity"" = ""Quantity"" + 1
+                WHERE ""User_ID"" = @userID AND ""Card_ID"" = @cardID;";
+
+            NpgsqlParameter[] parameters = new NpgsqlParameter[]
+            {
+                new NpgsqlParameter("userID", userID),
+                new NpgsqlParameter("cardID", cardID)
+            };
+
+            database.ExecuteNonQuery(statement, transaction, parameters);
+        }
+
+        private void DecrementQuantity(int cardID, int userID, NpgsqlTransaction transaction = null)
+        {
+            const string statement = @"UPDATE public.""CardLibrary""
+                SET ""Quantity"" = ""Quantity"" - 1
                 WHERE ""User_ID"" = @userID AND ""Card_ID"" = @cardID;";
 
             NpgsqlParameter[] parameters = new NpgsqlParameter[]
@@ -89,6 +116,32 @@ namespace MonsterTradingCardGame.Repositories
             };
 
             database.ExecuteNonQuery(statement, transaction, parameters);
+        }
+
+        private void DeleteCard(int cardID, int userID, NpgsqlTransaction transaction = null)
+        {
+            const string statement = @"DELETE FROM public.""CardLibrary""
+                WHERE ""Card_ID"" = @cardID AND ""User_ID"" = @userID;";
+
+            NpgsqlParameter[] parameters = new NpgsqlParameter[]
+            {
+                new NpgsqlParameter("userID", userID),
+                new NpgsqlParameter("cardID", cardID)
+            };
+
+            database.ExecuteNonQuery(statement, transaction, parameters);
+        }
+
+        public CardLibraryItem GetCardLibraryItem(int cardID, int userID, NpgsqlTransaction transaction = null)
+        {
+            NpgsqlParameter[] parameters = new NpgsqlParameter[]
+            {
+                new NpgsqlParameter("cardID", cardID),
+                new NpgsqlParameter("userID", userID)
+            };
+
+            return GetCardLibraryItemsWhere("\"Card_ID\" = @cardID AND \"User_ID\" = @userId", transaction, parameters)
+                .FirstOrDefault();
         }
 
         public IEnumerable<CardLibraryItem> GetCardLibraryItemsByUserID(int userID, NpgsqlTransaction transaction = null)

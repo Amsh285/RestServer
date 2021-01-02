@@ -69,7 +69,15 @@ namespace MonsterTradingCardGame.Entities.TradeEntity
                 ValidateCardForTrade(trade.Card_ID, trade.User_ID, transaction);
                 ValidateCardForTrade(offer.Card_ID, offer.User_ID, transaction);
 
+                cardLibraryRepository.AddCardToLibrary(trade.Card_ID, offer.User_ID, transaction);
 
+                CardLibraryItem tradeItem = cardLibraryRepository.GetCardLibraryItem(trade.Card_ID, trade.User_ID, transaction);
+                cardLibraryRepository.RemoveCardFromLibrary(tradeItem, transaction);
+
+                cardLibraryRepository.AddCardToLibrary(offer.Card_ID, trade.User_ID, transaction);
+
+                CardLibraryItem offerItem = cardLibraryRepository.GetCardLibraryItem(offer.Card_ID, offer.User_ID, transaction);
+                cardLibraryRepository.RemoveCardFromLibrary(offerItem, transaction);
 
                 transaction.Commit();
             }
