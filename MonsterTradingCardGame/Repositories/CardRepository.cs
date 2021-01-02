@@ -69,7 +69,7 @@ namespace MonsterTradingCardGame.Repositories
             {
                 return new Card()
                 {
-                    CardID = reader.GetValue<int>("Card"),
+                    CardID = reader.GetValue<int>("Card_ID"),
                     Element = Enum.Parse<ElementType>(reader.GetValue<string>("ElementType")),
                     Type = Enum.Parse<CardType>(reader.GetValue<string>("CardType")),
                     Name = reader.GetValue<string>("Name"),

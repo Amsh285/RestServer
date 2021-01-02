@@ -19,6 +19,20 @@ namespace MonsterTradingCardGame.Repositories
             this.database = database;
         }
 
+        public bool TradeUIDExists(Guid tradeID, NpgsqlTransaction transaction)
+        {
+            const string statement = @"SELECT EXISTS(SELECT ""Trade_ID"" FROM public.""Trade"" WHERE ""Trade_ID"" = @tradeID);";
+
+            return database.ExecuteScalar<bool>(statement, transaction, new NpgsqlParameter("tradeID", tradeID));
+        }
+
+        public bool TradeOfferUIDExists(Guid tradeOfferID, NpgsqlTransaction transaction)
+        {
+            const string statement = @"SELECT EXISTS(SELECT ""Trade_Offer_ID"" FROM public.""Trade_Offer"" WHERE ""Trade_Offer_ID"" = @tradeOfferID);";
+
+            return database.ExecuteScalar<bool>(statement, transaction, new NpgsqlParameter("tradeOfferID", tradeOfferID));
+        }
+
         public void InsertTrade(Guid tradeID, int userID, int cardID, NpgsqlTransaction transaction = null)
         {
             const string statement = @"INSERT INTO public.""Trade""(
@@ -52,6 +66,22 @@ namespace MonsterTradingCardGame.Repositories
             };
 
             database.ExecuteNonQuery(statement, transaction, parameters);
+        }
+
+        public void DeleteTrade(Guid tradeID, NpgsqlTransaction transaction = null)
+        {
+            const string statement = @"DELETE FROM public.""Trade""
+                WHERE ""Trade_ID"" = @tradeID;";
+
+            database.ExecuteNonQuery(statement, transaction, new NpgsqlParameter("tradeID", tradeID));
+        }
+
+        public void DeleteTradeOffer(Guid tradeOfferId, NpgsqlTransaction transaction = null)
+        {
+            const string statement = @"DELETE FROM public.""Trade_Offer""
+                WHERE ""Trade_Offer_ID"" = @tradeOfferId;";
+
+            database.ExecuteNonQuery(statement, transaction, new NpgsqlParameter("tradeOfferId", tradeOfferId));
         }
 
         public Trade GetTrade(Guid tradeID, NpgsqlTransaction transaction = null)

@@ -4,6 +4,7 @@ using MonsterTradingCardGame.Models;
 using MonsterTradingCardGame.Repositories;
 using Npgsql;
 using RestServer.WebServer.CommunicationObjects;
+using RestServer.WebServer.Infrastructure;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -33,6 +34,9 @@ namespace MonsterTradingCardGame.Entities.TradeEntity
 
                 ValidateCardForTrade(card.CardID, session.UserID, transaction);
 
+                if (tradeRepository.TradeUIDExists(tradeID, transaction))
+                    throw new UniqueConstraintViolationException($"Cannot Insert new Trade with ID:{tradeID}. This ID already exists.");
+
                 tradeRepository.InsertTrade(tradeID, session.UserID, card.CardID, transaction);
                 transaction.Commit();
             }
@@ -51,6 +55,9 @@ namespace MonsterTradingCardGame.Entities.TradeEntity
                 if (target.User_ID == session.UserID)
                     throw new InvalidTradeException($"Session UserID: {session.UserID}, you cannot Trade with yourself.");
 
+                if (tradeRepository.TradeOfferUIDExists(tradeOfferID, transaction))
+                    throw new UniqueConstraintViolationException($"Cannot Insert new Offer with ID:{tradeOfferID}. This ID already exists.");
+
                 tradeRepository.InsertTradeOffer(tradeOfferID, tradeID, session.UserID, offer.CardID, transaction);
                 transaction.Commit();
             }
@@ -66,6 +73,15 @@ namespace MonsterTradingCardGame.Entities.TradeEntity
                 Trade trade = tradeRepository.GetTrade(tradeID, transaction);
                 TradeOffer offer = tradeRepository.GetTradeOffer(tradeOfferID, transaction);
 
+                if (trade == null)
+                    throw new NotFoundException($"Trade with ID:{trade} could not be found.");
+
+                if (offer == null)
+                    throw new NotFoundException($"TradeOffer with ID:{tradeOfferID} could not be found.");
+
+                if (trade.User_ID != session.UserID)
+                    throw new InvalidAcceptorException($"Cannot Accept Trade with ID: {trade.Trade_ID}. Invalid User.");
+
                 ValidateCardForTrade(trade.Card_ID, trade.User_ID, transaction);
                 ValidateCardForTrade(offer.Card_ID, offer.User_ID, transaction);
 
@@ -79,6 +95,9 @@ namespace MonsterTradingCardGame.Entities.TradeEntity
                 CardLibraryItem offerItem = cardLibraryRepository.GetCardLibraryItem(offer.Card_ID, offer.User_ID, transaction);
                 cardLibraryRepository.RemoveCardFromLibrary(offerItem, transaction);
 
+                tradeRepository.DeleteTradeOffer(tradeOfferID, transaction);
+                tradeRepository.DeleteTrade(tradeID, transaction);
+
                 transaction.Commit();
             }
         }
@@ -90,7 +109,7 @@ namespace MonsterTradingCardGame.Entities.TradeEntity
                     $"Card: [UserID:{userID}, CardID:{cardID}] cannot be traded, the specified Card isn´t located in the specified Users CardLibrary."
                 );
 
-            if(!cardLibraryRepository.CardIsAvailableForTrading(cardID, userID, transaction))
+            if (!cardLibraryRepository.CardIsAvailableForTrading(cardID, userID, transaction))
                 throw new CardUnvailableForTradeException(
                     $"Card: [UserID:{userID}, CardID:{cardID}] cannot be traded, There is one or more Deck/s that use all Quantities of the specified Card."
                 );

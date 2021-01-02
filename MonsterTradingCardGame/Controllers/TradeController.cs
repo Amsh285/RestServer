@@ -1,4 +1,5 @@
-﻿using MonsterTradingCardGame.Entities.TradeEntity;
+﻿using MasterTradingCardGame.Database;
+using MonsterTradingCardGame.Entities.TradeEntity;
 using MonsterTradingCardGame.Infrastructure;
 using MonsterTradingCardGame.Infrastructure.Authentication;
 using MonsterTradingCardGame.Models;
@@ -52,7 +53,7 @@ namespace MonsterTradingCardGame.Controllers
                 return Unauthorized(nfEx.Message);
             }
             catch (Exception ex) when (ex is InvalidSessionTokenFormatException || ex is SessionExpiredException
-                || ex is CardUnvailableForTradeException)
+                || ex is CardUnvailableForTradeException || ex is UniqueConstraintViolationException)
             {
                 return BadRequest(ex.Message);
             }
@@ -71,7 +72,8 @@ namespace MonsterTradingCardGame.Controllers
                 return Unauthorized(nfEx.Message);
             }
             catch (Exception ex) when (ex is InvalidSessionTokenFormatException || ex is SessionExpiredException
-                || ex is InvalidTradeException || ex is CardUnvailableForTradeException)
+                || ex is InvalidTradeException || ex is CardUnvailableForTradeException
+                || ex is UniqueConstraintViolationException)
             {
                 return BadRequest(ex.Message);
             }
@@ -90,7 +92,7 @@ namespace MonsterTradingCardGame.Controllers
                 return Unauthorized(nfEx.Message);
             }
             catch (Exception ex) when (ex is InvalidSessionTokenFormatException || ex is SessionExpiredException
-                || ex is CardUnvailableForTradeException)
+                || ex is CardUnvailableForTradeException || ex is NotFoundException || ex is InvalidAcceptorException)
             {
                 return BadRequest(ex.Message);
             }

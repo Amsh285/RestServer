@@ -140,7 +140,7 @@ namespace MonsterTradingCardGame.Repositories
                 new NpgsqlParameter("userID", userID)
             };
 
-            return GetCardLibraryItemsWhere("\"Card_ID\" = @cardID AND \"User_ID\" = @userId", transaction, parameters)
+            return GetCardLibraryItemsWhere("\"Card\".\"Card_ID\" = @cardID AND \"User_ID\" = @userId", transaction, parameters)
                 .FirstOrDefault();
         }
 
