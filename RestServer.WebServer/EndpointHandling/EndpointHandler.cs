@@ -78,8 +78,21 @@ namespace RestServer.WebServer.EndpointHandling
 
                 try
                 {
-                    object result = JsonSerializer.Deserialize(correspondingParameter, actionParameter.ParameterType);
-                    invokeArguments.Add(result);
+                    if (actionParameter.ParameterType == typeof(Guid))
+                    {
+                        if (Guid.TryParse(correspondingParameter, out Guid result))
+                            invokeArguments.Add(result);
+                        else
+                            throw new EndPointHandlerException(
+                                $"Error parsing expected Guid- Parameter: {actionParameter.Name}. "
+                                + $"Value: {correspondingParameter} could not be parsed."
+                            );
+                    }
+                    else
+                    {
+                        object result = JsonSerializer.Deserialize(correspondingParameter, actionParameter.ParameterType);
+                        invokeArguments.Add(result);
+                    }
                 }
                 catch (JsonException jsonEx)
                 {

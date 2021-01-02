@@ -223,19 +223,34 @@ curl -X GET http://127.0.0.1:13001/User/Deck/Deck01 --cookie kienboec.kekse
 echo.
 
 REM --------------------------------------------------
+echo 9) Trading
+curl -X GET http://127.0.0.1:13001/Trade/GetTradeAvailableCard --header "Content-Type: Json" --cookie altenhof.kekse -o ./Response/tradeCardAltenhof.txt
+echo.
 
-echo 9) Queue for duels
+curl -X GET http://127.0.0.1:13001/Trade/GetTradeAvailableCard --header "Content-Type: Json" --cookie kienboec.kekse -o ./Response/tradeCardKienboec.txt
+echo.
 
-echo 9) Queue for duels altenhof
+curl -X POST http://127.0.0.1:13001/Trade/73FBC767-D80C-4946-A447-A0E599084980 --header "Content-Type: Json" --cookie altenhof.kekse --data-binary @./Response/tradeCardAltenhof.txt
+echo.
+
+curl -X POST http://127.0.0.1:13001/Trade/73FBC767-D80C-4946-A447-A0E599084980/offer/745E0D11-60E8-4FB3-A501-323FBC6AF25C  --header "Content-Type: Json" --cookie kienboec.kekse --data-binary @./Response/tradeCardKienboec.txt
+echo.
+
+curl -X POST http://127.0.0.1:13001/Trade/73FBC767-D80C-4946-A447-A0E599084980/offer/745E0D11-60E8-4FB3-A501-323FBC6AF25C/accept --cookie altenhof.kekse
+echo.
+
+REM --------------------------------------------------
+echo 10) Queue for duels
+
+echo 10) Queue for duels altenhof
 start /b "altenhof battle" curl -X POST http://127.0.0.1:13001/Battle --header "deckName: Deck01" --cookie altenhof.kekse -o ./Response/altenhof.txt
 
-echo 9) Queue for duels kienboec
+echo 10) Queue for duels kienboec
 start /b "kienboec battle" curl -X POST http://127.0.0.1:13001/Battle --header "deckName: Deck01" --cookie kienboec.kekse -o ./Response/kienboec.txt
 ping localhost -n 10 >NUL 2>NUL
 
-
 REM --------------------------------------------------
-echo 10) Get Battlelog
+echo 11) Get Battlelog
 
 curl -X GET http://127.0.0.1:13001/Battle/Battlelog --header "Content-Type: Json" --cookie kienboec.kekse --data-binary @./Response/kienboec.txt -o ./Response/BattleResult_kienboec.txt
 echo.
