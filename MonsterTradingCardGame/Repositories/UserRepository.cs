@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Text;
 using System.Linq;
+using MonsterTradingCardGame.Models;
 
 namespace MasterTradingCardGame.Repositories
 {
@@ -18,7 +19,7 @@ namespace MasterTradingCardGame.Repositories
             const string statement = @"UPDATE public.""User""
                 SET ""UserName"" = @username, ""FirstName"" = @firstName, ""LastName"" = @lastName,
                 ""Email"" = @email, ""Password"" = @password, ""Salt"" = @salt, ""HashAlgorithm"" = @hashalgorithm,
-                ""Coins"" = @coins, ""Rating"" = @rating, ""GamesPlayed"" = @gamesPlayed, ""Winrate"" = @winrate
+                ""Coins"" = @coins, ""Rating"" = @rating, ""GamesPlayed"" = @gamesPlayed, ""GamesWon"" = @gamesWon, ""GamesLost"" = @gamesLost, ""Winrate"" = @winrate
                WHERE ""User_ID"" = @userID;";
 
             NpgsqlParameter[] parameters = new NpgsqlParameter[]
@@ -34,7 +35,8 @@ namespace MasterTradingCardGame.Repositories
                 new NpgsqlParameter("rating", user.Rating),
                 new NpgsqlParameter("gamesPlayed", user.GamesPlayed),
                 new NpgsqlParameter("winrate", user.Winrate),
-
+                new NpgsqlParameter("gamesWon", user.GamesWon),
+                new NpgsqlParameter("gamesLost", user.GamesLost),
                 new NpgsqlParameter("userID", user.UserID),
             };
 
@@ -62,8 +64,9 @@ namespace MasterTradingCardGame.Repositories
                 if (!UserNameExists(newUser, transaction))
                 {
                     string insertUserStatement = @"INSERT INTO public.""User""(""FirstName"", ""LastName"", ""UserName"", ""Email"", ""Password"",
-                                ""Salt"", ""HashAlgorithm"", ""Coins"", ""Rating"", ""GamesPlayed"", ""Winrate"")
-	                            VALUES(@firstName, @lastName, @userName, @email, @password, @salt, @hashAlgorithm, @coins, @rating, @gamesplayed, @winrate); ";
+                                ""Salt"", ""HashAlgorithm"", ""Coins"", ""Rating"", ""GamesPlayed"", ""GamesWon"", ""GamesLost"", ""Winrate"")
+	                            VALUES(@firstName, @lastName, @userName, @email, @password, @salt, @hashAlgorithm, @coins, @rating, @gamesplayed,
+                                @gamesWon, @gamesLost, @winrate); ";
 
                     database.ExecuteNonQuery(insertUserStatement, transaction,
                         new NpgsqlParameter("firstName", newUser.FirstName),
@@ -76,6 +79,8 @@ namespace MasterTradingCardGame.Repositories
                         new NpgsqlParameter("coins", 20),
                         new NpgsqlParameter("rating", 1500),
                         new NpgsqlParameter("gamesplayed", (object)0),
+                        new NpgsqlParameter("gamesWon", (object)0),
+                        new NpgsqlParameter("gamesLost", (object)0),
                         new NpgsqlParameter("winrate", (object)0)
                     );
 
@@ -97,6 +102,27 @@ namespace MasterTradingCardGame.Repositories
                 transaction,
                 new NpgsqlParameter("userName", registerUser.UserName)
             );
+        }
+
+        public IEnumerable<HighScoreEntry> GetHighScore(NpgsqlTransaction transaction)
+        {
+            const string statement = @"SELECT ""UserName"", ""GamesWon"", ""GamesLost"", ""Winrate""
+                FROM public.""User""
+                ORDER BY ""Winrate"" DESC
+                LIMIT 10";
+
+            HighScoreEntry ReadHighScoreEntryRow(NpgsqlDataReader reader)
+            {
+                return new HighScoreEntry()
+                {
+                    UserName = reader.GetValue<string>("UserName"),
+                    GamesWon = reader.GetValue<int>("GamesWon"),
+                    GamesLost = reader.GetValue<int>("GamesLost"),
+                    Score = reader.GetValue<int>("Winrate")
+                };
+            }
+
+            return database.Execute(statement, transaction, ReadHighScoreEntryRow, null);
         }
 
         public User GetUserFromDeckID(int deckID, NpgsqlTransaction transaction = null)
@@ -161,6 +187,8 @@ namespace MasterTradingCardGame.Repositories
                 Coins = row.GetValue<int>("Coins"),
                 Rating = row.GetValue<int>("Rating"),
                 GamesPlayed = row.GetValue<int>("GamesPlayed"),
+                GamesWon = row.GetValue<int>("GamesWon"),
+                GamesLost = row.GetValue<int>("GamesLost"),
                 Winrate = row.GetValue<int>("Winrate")
             };
         }

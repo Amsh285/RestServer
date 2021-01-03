@@ -38,7 +38,9 @@ namespace MasterTradingCardGame.Database
             {
                 using(NpgsqlCommand command = new NpgsqlCommand(statement, transaction.Connection, transaction))
                 {
-                    command.Parameters.AddRange(parameters);
+                    if(parameters != null)
+                        command.Parameters.AddRange(parameters);
+
                     return ExecuteReader(command, rowSelector);
                 }
             }
@@ -47,7 +49,9 @@ namespace MasterTradingCardGame.Database
                 using (NpgsqlConnection connection = CreateAndOpenConnection())
                 using (NpgsqlCommand command = new NpgsqlCommand(statement, connection))
                 {
-                    command.Parameters.AddRange(parameters);
+                    if (parameters != null)
+                        command.Parameters.AddRange(parameters);
+
                     return ExecuteReader(command, rowSelector);
                 }
             }

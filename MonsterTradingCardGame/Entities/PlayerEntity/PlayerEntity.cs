@@ -50,6 +50,15 @@ namespace MonsterTradingCardGame.Entities.PlayerEntity
             }
         }
 
+        public IEnumerable<HighScoreEntry> GetHighScore()
+        {
+            using (NpgsqlConnection connection = database.CreateAndOpenConnection())
+            using (NpgsqlTransaction transaction = connection.BeginTransaction())
+            {
+                return userRepository.GetHighScore(transaction);
+            }
+        }
+
         private readonly UserRepository userRepository = new UserRepository();
         private readonly CardLibraryRepository cardLibraryRepository = new CardLibraryRepository(database);
         private readonly BoosterRepository boosterRepository = new BoosterRepository(database);

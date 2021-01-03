@@ -1,4 +1,6 @@
-﻿using MonsterTradingCardGame.Infrastructure;
+﻿using MonsterTradingCardGame.Entities.PlayerEntity;
+using MonsterTradingCardGame.Entities.UserEntity;
+using MonsterTradingCardGame.Infrastructure;
 using MonsterTradingCardGame.Infrastructure.Authentication;
 using MonsterTradingCardGame.Models;
 using MonsterTradingCardGame.Modules;
@@ -8,6 +10,7 @@ using RestServer.WebServer.EndpointHandling.Attributes;
 using RestServer.WebServer.Infrastructure;
 using System;
 using System.Diagnostics;
+using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 
@@ -20,6 +23,15 @@ namespace MonsterTradingCardGame.Controllers
             Assert.NotNull(requestContext, nameof(requestContext));
 
             this.requestContext = requestContext;
+        }
+
+        [HttpGet("Highscore")]
+        public IActionResult GetHighScore()
+        {
+            HighScoreEntry[] highScore = playerEntity.GetHighScore()
+                .ToArray();
+
+            return Json(highScore, new JsonSerializerOptions() { WriteIndented = true });
         }
 
         [HttpGet("Battlelog")]
@@ -66,6 +78,7 @@ namespace MonsterTradingCardGame.Controllers
             }
         }
 
+        private readonly PlayerEntity playerEntity = new PlayerEntity();
         private readonly AutomaticDuelMatchmaker matchmaker = new AutomaticDuelMatchmaker();
         private readonly AutomaticDuelModule duelModule = new AutomaticDuelModule();
         private readonly RequestContext requestContext;

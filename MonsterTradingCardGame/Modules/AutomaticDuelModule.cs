@@ -1,5 +1,6 @@
 ﻿using MasterTradingCardGame.Database;
 using MasterTradingCardGame.Models;
+using MasterTradingCardGame.Repositories;
 using MonsterTradingCardGame.Models;
 using MonsterTradingCardGame.Repositories;
 using Npgsql;
@@ -49,11 +50,13 @@ namespace MonsterTradingCardGame.Modules
                     if (deck1.Cards.Count == 0)
                     {
                         winner = deck2.Player;
+                        ApplyStats(winner, deck1.Player);
                         break;
                     }
                     else if (deck2.Cards.Count == 0)
                     {
                         winner = deck1.Player;
+                        ApplyStats(winner, deck2.Player);
                         break;
                     }
 
@@ -120,6 +123,29 @@ namespace MonsterTradingCardGame.Modules
             }
         }
 
+        private void ApplyStats(User winner, User loser, NpgsqlTransaction transaction = null)
+        {
+            Assert.NotNull(winner, nameof(winner));
+            Assert.NotNull(loser, nameof(loser));
+
+            ++winner.GamesPlayed;
+            ++winner.GamesWon;
+            winner.Rating += 3;
+
+            Assert.That(winner.GamesPlayed > 0, "winner.GamesPlayed must be larger than 0.");
+            winner.Winrate = winner.GamesWon / winner.GamesPlayed;
+
+            ++loser.GamesPlayed;
+            ++loser.GamesLost;
+            loser.Rating -= 5;
+
+            Assert.That(loser.GamesPlayed > 0, "winner.GamesPlayed must be larger than 0.");
+            loser.Winrate = loser.GamesWon / loser.GamesPlayed;
+
+            userRepository.UpdateUser(winner, transaction);
+            userRepository.UpdateUser(loser, transaction);
+        }
+
         private static AutomaticDuelResult GetBattleResult(User winner, User user1, User user2)
         {
             Assert.NotNull(user1, nameof(user1));
@@ -179,6 +205,7 @@ namespace MonsterTradingCardGame.Modules
 
         private readonly Random randomNumberGenerator = new Random((int)DateTime.Now.Ticks);
 
+        private readonly UserRepository userRepository = new UserRepository();
         private readonly BattleLogRepository battleLogRepository = new BattleLogRepository(database);
         private readonly DeckRepository deckRepository = new DeckRepository(database);
 

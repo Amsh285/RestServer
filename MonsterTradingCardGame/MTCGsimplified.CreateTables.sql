@@ -10,6 +10,8 @@ CREATE TABLE "User" (
   "Coins" int NOT NULL,
   "Rating" int NOT NULL,
   "GamesPlayed" int NOT NULL,
+  "GamesWon" int NOT NULL,
+  "GamesLost" int NOT NULL,
   "Winrate" int NOT NULL
 );
 

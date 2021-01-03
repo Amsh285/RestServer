@@ -1,0 +1,19 @@
+1.) Technical steps:
+1.1) Design:
+
+
+1.2) Design mistakes:
+Gamedesign: Schlechte Balance meisten games enden in unentschieden weil Trump nicht besiegbar ist.
+
+2.) Unit Tests:
+
+3.) Time spent:
+26.10.2020 5h
+27.10.2020 4h
+
+28.12.2020 5h
+29.12.2020 5h
+30.12.2020 5h
+31.12.2020 3h
+01.01.2020 3h
+03.01.2020 4h

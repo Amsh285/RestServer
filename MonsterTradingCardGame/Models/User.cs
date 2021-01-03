@@ -29,6 +29,10 @@ namespace MasterTradingCardGame.Models
 
         public int GamesPlayed { get; set; }
 
+        public int GamesWon { get; set; }
+
+        public int GamesLost { get; set; }
+
         public int Winrate { get; set; }
     }
 }

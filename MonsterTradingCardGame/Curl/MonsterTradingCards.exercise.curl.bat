@@ -255,3 +255,8 @@ echo 11) Get Battlelog
 curl -X GET http://127.0.0.1:13001/Battle/Battlelog --header "Content-Type: Json" --cookie kienboec.kekse --data-binary @./Response/kienboec.txt -o ./Response/BattleResult_kienboec.txt
 echo.
 
+REM --------------------------------------------------
+echo 12) Get Highscore
+
+curl -X GET http://127.0.0.1:13001/Battle/Highscore --cookie kienboec.kekse -o ./Response/Highscore.txt
+echo.
